@@ -41,13 +41,13 @@ const navigationItems = [
     icon: Users,
   },
   {
-    title: "transactions",
-    url: "/transactions",
+    title: "Invoices",
+    url: "/invoices",
     icon: History,
   },
   {
     title: "User Management",
-    url: "/user-management",
+    url: "/user_management",
     icon: Users,
   },
   {

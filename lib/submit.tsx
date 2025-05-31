@@ -1,5 +1,3 @@
-"use server"
-
 import { getPocketBase } from "./pocketbase";
 
 export async function submitForm<T>(

@@ -8,7 +8,7 @@ export function initPocketBase() {
   // const cookiesStore = await cookies()
   if (!pb) {
     // Make sure we have a valid URL with protocol
-    const url = process.env.NEXT_PUBLIC_POCKETBASE_URL || "http://127.0.0.1:8090"
+    const url = process.env.NEXT_PUBLIC_POCKETBASE_URL || "https://api.dahab.qb4.tech"
 
     // Ensure the URL has a protocol
     const finalUrl = url.startsWith("http") ? url : `http://${url}`

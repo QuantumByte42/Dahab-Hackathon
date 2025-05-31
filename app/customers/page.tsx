@@ -11,8 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useLanguage } from "@/contexts/language-context"
 import { Users, Plus, Search, Edit, Eye, Phone, Mail } from "lucide-react"
 import { get_customers } from "@/lib/api"
-import { CustomerRecord } from "@/lib/definitions"
 import { submitForm } from "@/lib/submit"
+import { CustomersRecord } from '@/lib/pocketbase-types'
 
 // Mock purchase history
 const mockPurchaseHistory = {
@@ -37,7 +37,7 @@ const mockPurchaseHistory = {
 export default function CustomersPage() {
   const { t, isRTL } = useLanguage()
   const [searchTerm, setSearchTerm] = useState("")
-  const [customers, setCustomers] = useState<CustomerRecord[]>([])
+  const [customers, setCustomers] = useState<CustomersRecord[]>([])
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null)
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [newCustomer, setNewCustomer] = useState({
@@ -47,23 +47,7 @@ export default function CustomersPage() {
     address: "",
   })
 
-  const filteredCustomers = customers.filter(
-    (customer) =>
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.phone.includes(searchTerm) ||
-      customer.email.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
-
-  useEffect(() => {
-    const fetch = async () => {
-      const customers = await get_customers()
-      setCustomers(customers);
-    }
-    fetch()
-  }, [])
-
   const handleSubmit = async () => {
-    console.log("test")
     try {
       const ret = await submitForm(null, "customers", newCustomer);
       if (ret.record)
@@ -75,6 +59,21 @@ export default function CustomersPage() {
     setShowAddDialog(false)
     setNewCustomer({ name: "", phone: "", email: "", address: "" })
   }
+
+  const filteredCustomers = customers.filter(
+    (customer) =>
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.phone?.includes(searchTerm) ||
+      customer.email?.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
+
+  useEffect(() => {
+    const fetch = async () => {
+      const customers = await get_customers()
+      setCustomers(customers);
+    }
+    fetch()
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -105,59 +104,59 @@ export default function CustomersPage() {
               <DialogTitle>Add New Customer</DialogTitle>
             </DialogHeader>
             
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-4" >
-                <div className="space-y-2">
-                  <Label htmlFor="name">Customer Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={newCustomer.name}
-                    onChange={handleInputChange}
-                    placeholder="Enter customer name"
-                    required
-                    />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    value={newCustomer.phone}
-                    onChange={handleInputChange}
-                    placeholder="+962-XX-XXXXXXX"
-                    required
-                    />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email (Optional)</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={newCustomer.email}
-                    onChange={handleInputChange}
-                    placeholder="customer@email.com"
-                    />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address (Optional)</Label>
-                  <Input
-                    id="address"
-                    name="address"
-                    value={newCustomer.address}
-                    onChange={handleInputChange}
-                    placeholder="Customer address"
-                    />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={handleCancelButton}>
-                    {t("cancel")}
-                  </Button>
-                  <Button type="submit">{t("add")}</Button>
-                </div>
-              </div>
-            </form>
+            <div className="space-y-4" >
+              <form onSubmit={handleSubmit}>
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Customer Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={newCustomer.name}
+                      onChange={handleInputChange}
+                      placeholder="Enter customer name"
+                      required
+                      />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      value={newCustomer.phone}
+                      onChange={handleInputChange}
+                      placeholder="+962-XX-XXXXXXX"
+                      required
+                      />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email (Optional)</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={newCustomer.email}
+                      onChange={handleInputChange}
+                      placeholder="customer@email.com"
+                      />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Address (Optional)</Label>
+                    <Input
+                      id="address"
+                      name="address"
+                      value={newCustomer.address}
+                      onChange={handleInputChange}
+                      placeholder="Customer address"
+                      />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={handleCancelButton}>
+                      {t("cancel")}
+                    </Button>
+                    <Button type="submit">{t("add")}</Button>
+                  </div>
+              </form>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
@@ -219,14 +218,14 @@ export default function CustomersPage() {
                   </TableCell>
                   <TableCell>
                     <span className="font-medium">
-                      {customer.total_purchases.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
+                      {customer.total_purchases?.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
                     </span>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">{customer.purchase_count} purchases</Badge>
                   </TableCell>
                   <TableCell>
-                    {new Date(customer.last_purchase).toLocaleDateString(isRTL ? "ar-JO" : "en-US")}
+                    {new Date(customer.last_purchase || "").toLocaleDateString(isRTL ? "ar-JO" : "en-US")}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
