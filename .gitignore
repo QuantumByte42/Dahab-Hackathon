@@ -34,3 +34,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+# campus files
+
+_cacache
+_logs
+_npx
+_update*
+package-lock.json
