@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
   
   // Environment variables configuration
   env: {
-    NEXT_POCKETBASE: process.env.NEXT_POCKETBASE || 'http://localhost:8090',
+    NEXT_POCKETBASE: process.env.NEXT_POCKETBASE || 'https://api.dahab.qb4.tech/',
   },
   
   // Image optimization configuration for production
