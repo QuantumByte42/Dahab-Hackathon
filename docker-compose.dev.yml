@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # Next.js Development Application
+  dahab-pos-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_POCKETBASE_URL=http://localhost:8090
+      - NEXT_POCKETBASE=http://pocketbase:8090
+    depends_on:
+      - pocketbase
+    networks:
+      - dahab-network
+    restart: unless-stopped
+    command: npm run dev
+
+  # PocketBase Backend (same as production)
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./pb_data:/pb_data
+      - ./pb_migrations:/pb_migrations
+    environment:
+      - POCKETBASE_ADMIN_EMAIL=admin@dahab.com
+      - POCKETBASE_ADMIN_PASSWORD=admin123456
+    command: 
+      - /usr/local/bin/pocketbase
+      - serve
+      - --http=0.0.0.0:8090
+      - --dir=/pb_data
+      - --migrationsDir=/pb_migrations
+    networks:
+      - dahab-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  dahab-network:
+    driver: bridge
+
+volumes:
+  pb_data:
+    driver: local

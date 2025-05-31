@@ -7,8 +7,11 @@ let pb: PocketBase
 export function initPocketBase() {
   // const cookiesStore = await cookies()
   if (!pb) {
-    // Make sure we have a valid URL with protocol
-    const url = process.env.NEXT_PUBLIC_POCKETBASE_URL || "https://api.dahab.qb4.tech"
+    // Get URL from environment variables, prioritizing NEXT_POCKETBASE for server-side
+    const url = 
+      process.env.NEXT_POCKETBASE || 
+      process.env.NEXT_PUBLIC_POCKETBASE_URL || 
+      "https://api.dahab.qb4.tech"
 
     // Ensure the URL has a protocol
     const finalUrl = url.startsWith("http") ? url : `http://${url}`
