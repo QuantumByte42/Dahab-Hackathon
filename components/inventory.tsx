@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,50 +8,36 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useLanguage } from "@/contexts/language-context"
 import { Package, Plus, Search, Edit, Trash2 } from "lucide-react"
-
-// Mock inventory data
-const mockInventory = [
-  {
-    id: "1",
-    name: "خاتم ذهب كلاسيكي",
-    type: "خاتم",
-    karat: 21,
-    weight_grams: 5.2,
-    cost_price_jod: 180.0,
-    selling_price_jod: 220.0,
-    quantity: 12,
-  },
-  {
-    id: "2",
-    name: "سلسلة ذهب فاخرة",
-    type: "سلسلة",
-    karat: 18,
-    weight_grams: 8.5,
-    cost_price_jod: 280.0,
-    selling_price_jod: 350.0,
-    quantity: 8,
-  },
-  {
-    id: "3",
-    name: "أقراط ذهب مرصعة",
-    type: "أقراط",
-    karat: 22,
-    weight_grams: 3.8,
-    cost_price_jod: 150.0,
-    selling_price_jod: 190.0,
-    quantity: 15,
-  },
-]
+import { get_inventory } from "@/lib/api"
+import { InventoryRecord } from "@/lib/pocketbase-types"
 
 export function Inventory() {
   const { t, isRTL } = useLanguage()
   const [searchTerm, setSearchTerm] = useState("")
-  const [inventory] = useState(mockInventory)
+  const [inventory, setInventory] = useState<InventoryRecord[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchInventory() {
+      try {
+        setLoading(true)
+        const data = await get_inventory()
+        setInventory(data)
+      } catch (error) {
+        console.error("Error fetching inventory:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchInventory()
+  }, [])
 
   const filteredInventory = inventory.filter(
     (item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.type.toLowerCase().includes(searchTerm.toLowerCase()),
+      item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.item_id.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   return (
@@ -102,35 +88,51 @@ export function Inventory() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredInventory.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell>{item.type}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{item.karat}K</Badge>
-                  </TableCell>
-                  <TableCell>{item.weight_grams}g</TableCell>
-                  <TableCell>
-                    {item.cost_price_jod.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
-                  </TableCell>
-                  <TableCell>
-                    {item.selling_price_jod.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={item.quantity < 5 ? "destructive" : "default"}>{item.quantity}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8">
+                    Loading inventory...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : filteredInventory.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8">
+                    No inventory items found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredInventory.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">{item.item_name}</TableCell>
+                    <TableCell>{item.type}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{item.karat}K</Badge>
+                    </TableCell>
+                    <TableCell>{item.weight}g</TableCell>
+                    <TableCell>
+                      {item.cost_price?.toFixed(2) || '0.00'} {isRTL ? "د.أ" : "JOD"}
+                    </TableCell>
+                    <TableCell>
+                      {item.selling_price?.toFixed(2) || '0.00'} {isRTL ? "د.أ" : "JOD"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={item.quantity && item.quantity < 5 ? "destructive" : "default"}>
+                        {item.quantity || 0}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>

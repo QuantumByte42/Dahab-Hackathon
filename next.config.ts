@@ -4,11 +4,8 @@ const nextConfig: NextConfig = {
   // Enable standalone output for Docker
   output: 'standalone',
   
-  // Experimental features
-  experimental: {
-    // Enable server-side rendering optimizations
-    serverComponentsExternalPackages: ['pocketbase'],
-  },
+  // Server external packages
+  serverExternalPackages: ['pocketbase'],
   
   // Environment variables configuration
   env: {

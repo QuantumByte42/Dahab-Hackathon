@@ -5,7 +5,6 @@ let pb: PocketBase
 
 // Initialize PocketBase
 export function initPocketBase() {
-  // const cookiesStore = await cookies()
   if (!pb) {
     // Get URL from environment variables, prioritizing NEXT_POCKETBASE for server-side
     const url = 
@@ -14,9 +13,12 @@ export function initPocketBase() {
       "https://api.dahab.qb4.tech"
 
     // Ensure the URL has a protocol
-    const finalUrl = url.startsWith("http") ? url : `http://${url}`
+    const finalUrl = url.startsWith("http") ? url : `https://${url}`
 
     pb = new PocketBase(finalUrl).autoCancellation(false)
+    
+    // Log connection for debugging
+    console.log("PocketBase initialized with URL:", finalUrl)
   }
   return pb
 }

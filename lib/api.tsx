@@ -1,5 +1,5 @@
 import { getPocketBase } from "./pocketbase";
-import { CustomersRecord, InventoryRecord, InvoicesRecord } from "./pocketbase-types";
+import { CustomersRecord, InventoryRecord, InvoicesRecord, InvoicesTypeOptions } from "./pocketbase-types";
 
 export async function get_customers() {
     const pb = getPocketBase()
@@ -74,10 +74,38 @@ export async function create_invoice(invoiceData: Partial<InvoicesRecord>) {
     const pb = getPocketBase()
     
     try {
-        const record = await pb.collection("invoices").create<InvoicesRecord>(invoiceData)
+        console.log('Attempting to create invoice with data:', invoiceData)
+        
+        // Ensure all required fields are present and properly formatted
+        const formattedData = {
+            ...invoiceData,
+            // Ensure numeric fields are properly formatted
+            subtotal: invoiceData.subtotal ? Number(invoiceData.subtotal) : 0,
+            making_charges: invoiceData.making_charges ? Number(invoiceData.making_charges) : 0,
+            total_amount: invoiceData.total_amount ? Number(invoiceData.total_amount) : 0,
+            // Ensure type is a string value matching PocketBase options
+            type: invoiceData.type === InvoicesTypeOptions.credit ? 'credit' : 'cash',
+            // Ensure items is properly formatted
+            items: invoiceData.items || []
+        }
+        
+        console.log('Formatted invoice data:', formattedData)
+        
+        const record = await pb.collection("invoices").create<InvoicesRecord>(formattedData)
+        console.log('Invoice created successfully:', record)
         return record
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error creating invoice:", error)
+        console.error("Invoice data that failed:", invoiceData)
+        
+        // Log detailed error information
+        if (error?.response?.data) {
+            console.error("PocketBase error details:", error.response.data)
+        }
+        if (error?.data) {
+            console.error("Error data:", error.data)
+        }
+        
         return null
     }
 }
@@ -260,5 +288,71 @@ export async function get_transactions(): Promise<TransactionData[]> {
     } catch (error) {
         console.error("Error fetching transactions:", error)
         return []
+    }
+}
+
+export async function get_vendors() {
+    const pb = getPocketBase()
+
+    try {
+        const records = await pb.collection("vendors")
+                                .getList(1, 50);
+        if (records.totalItems > 0)
+            return (records.items)
+        return ([])
+    } catch (error) {
+        console.error("Error fetching vendors:", error)
+        return ([])
+    }
+}
+
+export async function create_vendor(vendorData: { name: string }) {
+    const pb = getPocketBase()
+    
+    try {
+        const record = await pb.collection("vendors").create(vendorData)
+        return record
+    } catch (error) {
+        console.error("Error creating vendor:", error)
+        return null
+    }
+}
+
+export async function get_employees() {
+    const pb = getPocketBase()
+
+    try {
+        const records = await pb.collection("employees")
+                                .getList(1, 50);
+        if (records.totalItems > 0)
+            return (records.items)
+        return ([])
+    } catch (error) {
+        console.error("Error fetching employees:", error)
+        return ([])
+    }
+}
+
+export async function create_employee(employeeData: any) {
+    const pb = getPocketBase()
+    
+    try {
+        const record = await pb.collection("employees").create(employeeData)
+        return record
+    } catch (error) {
+        console.error("Error creating employee:", error)
+        return null
+    }
+}
+
+export async function create_inventory_item(inventoryData: any) {
+    const pb = getPocketBase()
+    
+    try {
+        const record = await pb.collection("inventory").create(inventoryData)
+        return record
+    } catch (error) {
+        console.error("Error creating inventory item:", error)
+        return null
     }
 }

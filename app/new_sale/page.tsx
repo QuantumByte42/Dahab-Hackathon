@@ -150,10 +150,11 @@ export default function SalesPage() {
         items: saleItems,
         subtotal,
         tax: 0, // No tax calculation for now
-        total: totalAmount,
+        total_amount: totalAmount,
         payment_method: transactionType.toLowerCase(),
         payment_status: "paid",
-        notes: `Sale created at ${new Date().toLocaleString()}`
+        notes: `Sale created at ${new Date().toLocaleString()}`,
+        making_charges: totalMakingCharges,
       }
 
       const invoice = await create_invoice(invoiceData)
@@ -189,7 +190,7 @@ export default function SalesPage() {
         quantity: "1",
       })
 
-      alert(`Sale completed successfully! Invoice: ${invoice.invoice_number}`)
+      alert(`Sale completed successfully! Invoice: ${invoice.id}`)
       
     } catch (error) {
       console.error("Error completing sale:", error)
