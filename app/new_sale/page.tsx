@@ -10,17 +10,25 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/contexts/language-context"
 import { ShoppingCart, Plus, Trash2, Printer, Calculator } from "lucide-react"
-import { InventoryTypeOptions, InventoryKaratOptions, CustomersRecord, InventoryRecord } from "@/lib/pocketbase-types"
-import { submitForm } from "@/lib/submit"
-import { get_item } from "@/lib/api"
+import { InventoryTypeOptions, InventoryKaratOptions } from "@/lib/pocketbase-types"
+import { get_item, create_customer, create_invoice, update_inventory_quantity, validate_inventory_availability } from "@/lib/api"
 
 export default function SalesPage() {
-  const { t, isRTL } = useLanguage()
+  const { isRTL } = useLanguage()
   const [customerName, setCustomerName] = useState("")
   const [customerPhone, setCustomerPhone] = useState("")
   const [transactionType, setTransactionType] = useState("")
   const [currentItemID, setCurrentItemID] = useState("")
-  const [saleItems, setSaleItems] = useState<any[]>([])
+  const [saleItems, setSaleItems] = useState<Array<{
+    item_id: string;
+    item_name: string;
+    type: string;
+    weight: number;
+    karat: string;
+    selling_price: number;
+    making_charges: number;
+    quantity: number;
+  }>>([]);
   const [currentItem, setCurrentItem] = useState({
     id: "",
     item_id: "",
@@ -39,12 +47,12 @@ export default function SalesPage() {
         return ;
       setCurrentItem({
         id: item.id,
-        item_id: item.item_id,
-        item_name: item.item_name,
-        type: item.type,
-        weight: item.weight.toString(),
-        karat: item.karat,
-        selling_price: item.selling_price.toString(),
+        item_id: item.item_id || "",
+        item_name: item.item_name || "",
+        type: item.type || "",
+        weight: item.weight ? item.weight.toString() : "",
+        karat: item.karat ? item.karat.toString().replace('E', '') : "",
+        selling_price: item.selling_price ? item.selling_price.toString() : "",
         quantity: "1",
       })
     }
@@ -108,34 +116,85 @@ export default function SalesPage() {
   const handleCompleteSale = async () => {
     if (saleItems.length === 0) return
 
+    try {
+      // 1. Validate inventory availability
+      const inventoryValidation = await validate_inventory_availability(
+        saleItems.map(item => ({ item_id: item.item_id, quantity: item.quantity }))
+      )
+      
+      const invalidItems = inventoryValidation.filter(v => !v.valid)
+      if (invalidItems.length > 0) {
+        alert(`Inventory validation failed:\n${invalidItems.map(item => item.message).join('\n')}`)
+        return
+      }
 
-    const res = await submitForm<CustomersRecord>(null, "invoices", {
-      name: customerName,
-      phone: customerPhone
-    })
+      // 2. Create or get customer
+      const customer = await create_customer({
+        name: customerName,
+        phone: customerPhone || undefined,
+        purchase_count: 1,
+        total_purchases: totalAmount
+      })
 
-    if (!res.record)
-    {
-      console.error(res.msg)
-      return ;
+      if (!customer) {
+        alert("Failed to create customer record")
+        return
+      }
+
+      // 3. Create invoice
+      const invoiceNumber = `INV-${Date.now()}`
+      const invoiceData = {
+        invoice_number: invoiceNumber,
+        date: new Date().toISOString(),
+        customer: customer.id,
+        items: saleItems,
+        subtotal,
+        tax: 0, // No tax calculation for now
+        total: totalAmount,
+        payment_method: transactionType.toLowerCase(),
+        payment_status: "paid",
+        notes: `Sale created at ${new Date().toLocaleString()}`
+      }
+
+      const invoice = await create_invoice(invoiceData)
+      
+      if (!invoice) {
+        alert("Failed to create invoice")
+        return
+      }
+
+      // 4. Update inventory quantities
+      for (const item of saleItems) {
+        try {
+          await update_inventory_quantity(item.item_id, item.quantity)
+        } catch (error) {
+          console.error(`Failed to update inventory for ${item.item_id}:`, error)
+          // Note: You might want to implement a rollback mechanism here
+        }
+      }
+
+      // 5. Clear the form
+      setSaleItems([])
+      setCustomerName("")
+      setCustomerPhone("")
+      setTransactionType("")
+      setCurrentItem({
+        id: "",
+        item_id: "",
+        item_name: "",
+        type: "",
+        weight: "",
+        karat: "",
+        selling_price: "",
+        quantity: "1",
+      })
+
+      alert(`Sale completed successfully! Invoice: ${invoice.invoice_number}`)
+      
+    } catch (error) {
+      console.error("Error completing sale:", error)
+      alert("Failed to complete sale. Please try again.")
     }
-    const customer = res.record
-
-    const saleData = {
-      No: `INV-${Date.now()}`,
-      customer: customer.id,
-      items: saleItems,
-      subtotal,
-      total_making_charges: totalMakingCharges,
-      total_amount: totalAmount,
-      transaction_type: transactionType,
-      date_time: new Date().toISOString(),
-      employee_id: "current_user_id", // Would come from auth context
-    }
-
-    console.log("Sale completed:", saleData)
-    // const res = submitForm(null, "invoices", saleData)
-    // Here you would save to PocketBase and print invoice
   }
 
   const printInvoice = () => {

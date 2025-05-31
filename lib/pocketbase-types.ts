@@ -166,12 +166,16 @@ export enum InvoicesTypeOptions {
 export type InvoicesRecord<Titems = unknown> = {
 	created?: IsoDateString
 	customer: RecordIdString
+	date: IsoDateString
 	id: string
+	invoice_number: string
 	items: null | Titems
-	making_charges: number
+	notes?: string
+	payment_method: string
+	payment_status: string
 	subtotal: number
-	total_amount: number
-	type: InvoicesTypeOptions
+	tax: number
+	total: number
 	updated?: IsoDateString
 	expand?: {customer?: CustomersRecord}
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,70 +10,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLanguage } from "@/contexts/language-context"
 import { History, Search, Filter, Download, Calendar } from "lucide-react"
+import { get_transactions } from "@/lib/api"
 
-// Mock transaction data
-const mockTransactions = [
-  {
-    id: "txn_001",
-    sale_id: "sale_001",
-    customer_name: "أحمد محمد الخالدي",
-    gold_type: "خاتم ذهب",
-    karat: 21,
-    weight_grams: 5.2,
-    price_per_gram_jod: 41.25,
-    total_amount_jod: 214.5,
-    payment_method: "cash",
-    created: "2024-01-15T10:30:00Z",
-  },
-  {
-    id: "txn_002",
-    sale_id: "sale_002",
-    customer_name: "فاطمة علي السعدي",
-    gold_type: "سلسلة ذهب",
-    karat: 18,
-    weight_grams: 8.5,
-    price_per_gram_jod: 35.5,
-    total_amount_jod: 301.75,
-    payment_method: "card",
-    created: "2024-01-15T09:15:00Z",
-  },
-  {
-    id: "txn_003",
-    sale_id: "sale_003",
-    customer_name: "محمد خالد النعيمي",
-    gold_type: "أقراط ذهب",
-    karat: 22,
-    weight_grams: 3.8,
-    price_per_gram_jod: 43.8,
-    total_amount_jod: 166.44,
-    payment_method: "deferred",
-    created: "2024-01-14T16:45:00Z",
-  },
-  {
-    id: "txn_004",
-    sale_id: "sale_004",
-    customer_name: "سارة أحمد الزهراني",
-    gold_type: "سوار ذهب",
-    karat: 21,
-    weight_grams: 12.3,
-    price_per_gram_jod: 41.25,
-    total_amount_jod: 507.38,
-    payment_method: "cash",
-    created: "2024-01-14T14:20:00Z",
-  },
-  {
-    id: "txn_005",
-    sale_id: "sale_005",
-    customer_name: "عبدالله محمد الحسني",
-    gold_type: "دلاية ذهب",
-    karat: 24,
-    weight_grams: 2.1,
-    price_per_gram_jod: 47.2,
-    total_amount_jod: 99.12,
-    payment_method: "card",
-    created: "2024-01-13T11:10:00Z",
-  },
-]
+interface TransactionData {
+    id: string
+    sale_id: string
+    customer_name: string
+    customer_phone?: string
+    gold_type: string
+    karat: number
+    weight_grams: number
+    price_per_gram_jod: number
+    total_amount_jod: number
+    payment_method: string
+    created: string
+}
 
 export function Transactions() {
   const { t, isRTL } = useLanguage()
@@ -81,9 +32,25 @@ export function Transactions() {
   const [dateFilter, setDateFilter] = useState("")
   const [paymentFilter, setPaymentFilter] = useState("")
   const [goldTypeFilter, setGoldTypeFilter] = useState("")
-  const [transactions] = useState(mockTransactions)
+  const [transactions, setTransactions] = useState<TransactionData[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const filteredTransactions = transactions.filter((transaction) => {
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const data = await get_transactions()
+        setTransactions(data)
+      } catch (error) {
+        console.error("Error fetching transactions:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTransactions()
+  }, [])
+
+  const filteredTransactions = transactions.filter((transaction: TransactionData) => {
     const matchesSearch =
       transaction.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       transaction.gold_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -98,8 +65,8 @@ export function Transactions() {
     return matchesSearch && matchesPayment && matchesGoldType && matchesDate
   })
 
-  const totalAmount = filteredTransactions.reduce((sum, transaction) => sum + transaction.total_amount_jod, 0)
-  const totalWeight = filteredTransactions.reduce((sum, transaction) => sum + transaction.weight_grams, 0)
+  const totalAmount = filteredTransactions.reduce((sum: number, transaction: TransactionData) => sum + transaction.total_amount_jod, 0)
+  const totalWeight = filteredTransactions.reduce((sum: number, transaction: TransactionData) => sum + transaction.weight_grams, 0)
 
   const exportTransactions = () => {
     // Here you would implement CSV/PDF export
@@ -113,6 +80,18 @@ export function Transactions() {
       deferred: "destructive" as const,
     }
     return variants[method as keyof typeof variants] || "default"
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <History className="h-6 w-6" />
+          <h1 className="text-3xl font-bold">{t("transactions")}</h1>
+        </div>
+        <div className="text-center py-8">Loading transactions...</div>
+      </div>
+    )
   }
 
   return (

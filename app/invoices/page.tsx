@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,96 +11,47 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useLanguage } from "@/contexts/language-context"
 import { History, Search, Filter, Download, Calendar } from "lucide-react"
 import { InvoicesRecord } from '@/lib/pocketbase-types'
-
-// Mock transaction data
-const mockTransactions = [
-  {
-    id: "txn_001",
-    sale_id: "sale_001",
-    customer_name: "أحمد محمد الخالدي",
-    gold_type: "خاتم ذهب",
-    karat: 21,
-    weight_grams: 5.2,
-    price_per_gram_jod: 41.25,
-    total_amount_jod: 214.5,
-    payment_method: "cash",
-    created: "2024-01-15T10:30:00Z",
-  },
-  {
-    id: "txn_002",
-    sale_id: "sale_002",
-    customer_name: "فاطمة علي السعدي",
-    gold_type: "سلسلة ذهب",
-    karat: 18,
-    weight_grams: 8.5,
-    price_per_gram_jod: 35.5,
-    total_amount_jod: 301.75,
-    payment_method: "card",
-    created: "2024-01-15T09:15:00Z",
-  },
-  {
-    id: "txn_003",
-    sale_id: "sale_003",
-    customer_name: "محمد خالد النعيمي",
-    gold_type: "أقراط ذهب",
-    karat: 22,
-    weight_grams: 3.8,
-    price_per_gram_jod: 43.8,
-    total_amount_jod: 166.44,
-    payment_method: "deferred",
-    created: "2024-01-14T16:45:00Z",
-  },
-  {
-    id: "txn_004",
-    sale_id: "sale_004",
-    customer_name: "سارة أحمد الزهراني",
-    gold_type: "سوار ذهب",
-    karat: 21,
-    weight_grams: 12.3,
-    price_per_gram_jod: 41.25,
-    total_amount_jod: 507.38,
-    payment_method: "cash",
-    created: "2024-01-14T14:20:00Z",
-  },
-  {
-    id: "txn_005",
-    sale_id: "sale_005",
-    customer_name: "عبدالله محمد الحسني",
-    gold_type: "دلاية ذهب",
-    karat: 24,
-    weight_grams: 2.1,
-    price_per_gram_jod: 47.2,
-    total_amount_jod: 99.12,
-    payment_method: "card",
-    created: "2024-01-13T11:10:00Z",
-  },
-]
+import { get_invoices } from '@/lib/api'
 
 export default function InvoicesPage() {
   const { t, isRTL } = useLanguage()
   const [searchTerm, setSearchTerm] = useState("")
   const [dateFilter, setDateFilter] = useState("")
   const [paymentFilter, setPaymentFilter] = useState("")
-  const [goldTypeFilter, setGoldTypeFilter] = useState("")
-  const [transactions] = useState<InvoicesRecord[]>([])
+  const [invoices, setInvoices] = useState<InvoicesRecord[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const filteredInvoices = transactions.filter((transaction) => {
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        setLoading(true)
+        const data = await get_invoices()
+        setInvoices(data)
+      } catch (error) {
+        console.error('Error fetching invoices:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchInvoices()
+  }, [])
+
+  const filteredInvoices = invoices.filter((invoice) => {
     const matchesSearch =
-      transaction.expand?.customer?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.id.toLowerCase().includes(searchTerm.toLowerCase())
+      invoice.expand?.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invoice.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invoice.id.toLowerCase().includes(searchTerm.toLowerCase())
 
-    const matchesPayment = !paymentFilter || transaction.type === paymentFilter
-    const matchesGoldType = !goldTypeFilter
+    const matchesPayment = !paymentFilter || paymentFilter === "all" || invoice.type === paymentFilter
 
     // Simple date filter - in real app, you'd want more sophisticated date filtering
-    const matchesDate = !dateFilter 
+    const matchesDate = !dateFilter || new Date(invoice.created || "").toDateString().includes(dateFilter)
 
-    return matchesSearch && matchesPayment && matchesGoldType && matchesDate
+    return matchesSearch && matchesPayment && matchesDate
   })
 
-  const totalAmount = filteredInvoices.reduce((sum, transaction) => sum + transaction.total_amount, 0)
-//   const totalWeight = filteredInvoices.reduce((sum, transaction) => sum + transaction.weight_grams, 0)
+  const totalAmount = filteredInvoices.reduce((sum: number, invoice: InvoicesRecord) => sum + (invoice.total_amount || 0), 0)
 
   const exportTransactions = () => {
     // Here you would implement CSV/PDF export
@@ -118,48 +69,53 @@ export default function InvoicesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <History className="h-6 w-6" />
-          <h1 className="text-3xl font-bold">{t("transactions")}</h1>
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Loading invoices...</div>
         </div>
-        <Button onClick={exportTransactions} className="gap-2">
-          <Download className="h-4 w-4" />
-          Export
-        </Button>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{filteredInvoices.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {totalAmount.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
+      ) : (
+        <>          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <History className="h-6 w-6" />
+              <h1 className="text-3xl font-bold">{t("invoices")}</h1>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Gold Weight</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* <div className="text-2xl font-bold">
-              {totalWeight.toFixed(1)} {isRTL ? "جرام" : "grams"}
-            </div> */}
-          </CardContent>
-        </Card>
-      </div>
+            <Button onClick={exportTransactions} className="gap-2">
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
+          </div>
+
+          {/* Summary Cards */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Total Invoices</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{filteredInvoices.length}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {totalAmount.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Average Invoice Value</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {filteredInvoices.length > 0 ? (totalAmount / filteredInvoices.length).toFixed(2) : '0.00'} {isRTL ? "د.أ" : "JOD"}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
       {/* Filters */}
       <Card>
@@ -170,13 +126,13 @@ export default function InvoicesPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-5">
+          <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
               <Label>Search</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search transactions..."
+                  placeholder="Search invoices..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -213,23 +169,6 @@ export default function InvoicesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Gold Type</Label>
-              <Select value={goldTypeFilter} onValueChange={setGoldTypeFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All types</SelectItem>
-                  <SelectItem value="خاتم">خاتم (Ring)</SelectItem>
-                  <SelectItem value="سلسلة">سلسلة (Necklace)</SelectItem>
-                  <SelectItem value="أقراط">أقراط (Earrings)</SelectItem>
-                  <SelectItem value="سوار">سوار (Bracelet)</SelectItem>
-                  <SelectItem value="دلاية">دلاية (Pendant)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
               <Label>&nbsp;</Label>
               <Button
                 variant="outline"
@@ -237,7 +176,6 @@ export default function InvoicesPage() {
                   setSearchTerm("")
                   setDateFilter("")
                   setPaymentFilter("")
-                  setGoldTypeFilter("")
                 }}
                 className="w-full"
               >
@@ -246,47 +184,29 @@ export default function InvoicesPage() {
             </div>
           </div>
         </CardContent>
-      </Card>
-
-      {/* Transactions Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Transaction History ({filteredInvoices.length})</CardTitle>
-        </CardHeader>
+      </Card>          {/* Invoices Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Invoice History ({filteredInvoices.length})</CardTitle>
+            </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Transaction ID</TableHead>
+                <TableHead>Invoice ID</TableHead>
                 <TableHead>Customer</TableHead>
-                {/* <TableHead>Gold Item</TableHead> */}
-                {/* <TableHead>Karat</TableHead> */}
-                {/* <TableHead>Weight</TableHead> */}
-                {/* <TableHead>Price/Gram</TableHead> */}
-                {/* <TableHead>Total Amount</TableHead> */}
-                <TableHead>Payment</TableHead>
+                <TableHead>Payment Type</TableHead>
                 <TableHead>Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredInvoices.map((invoice) => (
+              {filteredInvoices.map((invoice: InvoicesRecord) => (
                 <TableRow key={invoice.id}>
                   <TableCell className="font-mono text-sm">{invoice.id}</TableCell>
-                  <TableCell className="font-medium">{invoice.expand?.customer?.name}</TableCell>
-                  {/* <TableCell>{transaction.gold_type}</TableCell> */}
+                  <TableCell className="font-medium">{invoice.expand?.customer?.name || 'N/A'}</TableCell>
                   <TableCell>
-                    {/* <Badge variant="outline">{transaction.karat}K</Badge> */}
-                  </TableCell>
-                  {/* <TableCell>{transaction.weight_grams}g</TableCell> */}
-                  <TableCell>
-                    {/* {transaction.price_per_gram_jod.toFixed(2)} {isRTL ? "د.أ" : "JOD"} */}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {/* {transaction.total_amount_jod.toFixed(2)} {isRTL ? "د.أ" : "JOD"} */}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={getPaymentMethodBadge(invoice.type)}>
-                      {t(invoice.type)}
+                    <Badge variant={getPaymentMethodBadge(invoice.type || 'cash')}>
+                      {t(invoice.type || 'cash')}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -305,6 +225,8 @@ export default function InvoicesPage() {
           </Table>
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   )
 }
