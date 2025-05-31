@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,43 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { useLanguage } from "@/contexts/language-context"
 import { Users, Plus, Search, Edit, Eye, Phone, Mail } from "lucide-react"
-
-// Mock customer data
-const mockCustomers = [
-  {
-    id: "1",
-    name: "أحمد محمد الخالدي",
-    phone: "+962-79-1234567",
-    email: "ahmed.khaldi@email.com",
-    address: "عمان، الأردن",
-    total_purchases_jod: 2450.0,
-    last_purchase: "2024-01-15",
-    purchase_count: 8,
-    created: "2023-06-15",
-  },
-  {
-    id: "2",
-    name: "فاطمة علي السعدي",
-    phone: "+962-77-9876543",
-    email: "fatima.saadi@email.com",
-    address: "إربد، الأردن",
-    total_purchases_jod: 1850.0,
-    last_purchase: "2024-01-12",
-    purchase_count: 5,
-    created: "2023-08-22",
-  },
-  {
-    id: "3",
-    name: "محمد خالد النعيمي",
-    phone: "+962-78-5555444",
-    email: "mohammed.naeemi@email.com",
-    address: "الزرقاء، الأردن",
-    total_purchases_jod: 3200.0,
-    last_purchase: "2024-01-10",
-    purchase_count: 12,
-    created: "2023-03-10",
-  },
-]
+import { get_customers } from "@/lib/api"
+import { CustomerRecord } from "@/lib/definitions"
+import { submitForm } from "@/lib/submit"
 
 // Mock purchase history
 const mockPurchaseHistory = {
@@ -68,10 +34,10 @@ const mockPurchaseHistory = {
   ],
 }
 
-export function Customers() {
+export default function CustomersPage() {
   const { t, isRTL } = useLanguage()
   const [searchTerm, setSearchTerm] = useState("")
-  const [customers] = useState(mockCustomers)
+  const [customers, setCustomers] = useState<CustomerRecord[]>([])
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null)
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [newCustomer, setNewCustomer] = useState({
@@ -88,9 +54,34 @@ export function Customers() {
       customer.email.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
-  const handleAddCustomer = () => {
-    // Here you would add to PocketBase
-    console.log("Adding customer:", newCustomer)
+  useEffect(() => {
+    const fetch = async () => {
+      const customers = await get_customers()
+      setCustomers(customers);
+    }
+    fetch()
+  }, [])
+
+  const handleSubmit = async () => {
+    console.log("test")
+    try {
+      const ret = await submitForm(null, "customers", newCustomer);
+      if (ret.record)
+        console.log(ret.msg)
+      else
+        console.error(ret.msg)
+      // TODO add toast
+    } catch {}
+    setShowAddDialog(false)
+    setNewCustomer({ name: "", phone: "", email: "", address: "" })
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setNewCustomer((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleCancelButton = () => {
     setShowAddDialog(false)
     setNewCustomer({ name: "", phone: "", email: "", address: "" })
   }
@@ -113,51 +104,60 @@ export function Customers() {
             <DialogHeader>
               <DialogTitle>Add New Customer</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Customer Name</Label>
-                <Input
-                  id="name"
-                  value={newCustomer.name}
-                  onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
-                  placeholder="Enter customer name"
-                />
+            
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4" >
+                <div className="space-y-2">
+                  <Label htmlFor="name">Customer Name</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={newCustomer.name}
+                    onChange={handleInputChange}
+                    placeholder="Enter customer name"
+                    required
+                    />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    value={newCustomer.phone}
+                    onChange={handleInputChange}
+                    placeholder="+962-XX-XXXXXXX"
+                    required
+                    />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email (Optional)</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={newCustomer.email}
+                    onChange={handleInputChange}
+                    placeholder="customer@email.com"
+                    />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address (Optional)</Label>
+                  <Input
+                    id="address"
+                    name="address"
+                    value={newCustomer.address}
+                    onChange={handleInputChange}
+                    placeholder="Customer address"
+                    />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={handleCancelButton}>
+                    {t("cancel")}
+                  </Button>
+                  <Button type="submit">{t("add")}</Button>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  value={newCustomer.phone}
-                  onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
-                  placeholder="+962-XX-XXXXXXX"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email (Optional)</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={newCustomer.email}
-                  onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
-                  placeholder="customer@email.com"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address">Address (Optional)</Label>
-                <Input
-                  id="address"
-                  value={newCustomer.address}
-                  onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
-                  placeholder="Customer address"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowAddDialog(false)}>
-                  {t("cancel")}
-                </Button>
-                <Button onClick={handleAddCustomer}>{t("add")}</Button>
-              </div>
-            </div>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
@@ -219,7 +219,7 @@ export function Customers() {
                   </TableCell>
                   <TableCell>
                     <span className="font-medium">
-                      {customer.total_purchases_jod.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
+                      {customer.total_purchases.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
                     </span>
                   </TableCell>
                   <TableCell>

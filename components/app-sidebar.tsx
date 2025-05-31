@@ -14,7 +14,10 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar"
+
+import { useRouter } from 'next/navigation'
 import { useLanguage } from "@/contexts/language-context"
+import { useState } from "react"
 
 const navigationItems = [
   {
@@ -24,7 +27,7 @@ const navigationItems = [
   },
   {
     title: "newSale",
-    url: "/new-sale",
+    url: "/new_sale",
     icon: Plus,
   },
   {
@@ -59,13 +62,11 @@ const navigationItems = [
   },
 ]
 
-interface AppSidebarProps {
-  currentPage: string
-  onNavigate: (page: string) => void
-}
-
-export function AppSidebar({ currentPage, onNavigate }: AppSidebarProps) {
+export function AppSidebar() {
   const { t } = useLanguage()
+  const [currentPage, setCurrentPage] = useState("dashboard")
+  const router = useRouter()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <Sidebar>
@@ -87,8 +88,11 @@ export function AppSidebar({ currentPage, onNavigate }: AppSidebarProps) {
                     isActive={currentPage === item.url.slice(1) || (item.url === "/" && currentPage === "dashboard")}
                     onClick={() => {
                       const page = item.url === "/" ? "dashboard" : item.url.slice(1)
-                      onNavigate(page)
+                      setCurrentPage(page)
+                      if (currentPage !== page)
+                        router.push(item.url)
                     }}
+
                   >
                     <div className="flex items-center gap-2 cursor-pointer">
                       <item.icon className="h-4 w-4" />
