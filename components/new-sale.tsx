@@ -9,10 +9,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLanguage } from "@/contexts/language-context"
-import { Calculator, Save, Plus, Minus, Search } from "lucide-react"
+import { Calculator, Save, Plus, Minus, Search, ArrowLeft } from "lucide-react"
 import { get_inventory, create_customer, create_invoice, update_inventory_quantity, validate_inventory_availability } from "@/lib/api"
-import { InventoryRecord, InvoicesTypeOptions } from "@/lib/pocketbase-types"
+import { InventoryRecord, InvoicesTypeOptions, InvoicesRecord, CustomersRecord } from "@/lib/pocketbase-types"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import InvoicePrint from "@/components/invoice-print"
 
 interface CartItem {
   inventory_item: InventoryRecord
@@ -35,6 +36,12 @@ export function NewSale() {
   })
   const [paymentMethod, setPaymentMethod] = useState<InvoicesTypeOptions>(InvoicesTypeOptions.cash)
   const [loading, setLoading] = useState(false)
+  const [showInvoice, setShowInvoice] = useState(false)
+  const [completedInvoice, setCompletedInvoice] = useState<{
+    invoice: InvoicesRecord,
+    customer: CustomersRecord,
+    items: CartItem[]
+  } | null>(null)
 
   useEffect(() => {
     async function fetchInventory() {
@@ -228,7 +235,15 @@ export function NewSale() {
         await update_inventory_quantity(cartItem.inventory_item.item_id, cartItem.quantity)
       }
 
-      alert(`Sale completed successfully! Invoice: ${invoiceNo}`)
+      // Store completed invoice data for PDF generation
+      setCompletedInvoice({
+        invoice,
+        customer,
+        items: [...cart] // Make a copy of current cart
+      })
+
+      // Show invoice print view
+      setShowInvoice(true)
       
       // Reset form
       setCart([])
@@ -246,6 +261,58 @@ export function NewSale() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleBackToSale = () => {
+    setShowInvoice(false)
+    setCompletedInvoice(null)
+  }
+
+  // If showing invoice, render the invoice print component
+  if (showInvoice && completedInvoice) {
+    const invoiceData = {
+      invoiceNumber: completedInvoice.invoice.No,
+      date: completedInvoice.invoice.created || new Date().toISOString(),
+      customerName: completedInvoice.customer.name,
+      customerPhone: completedInvoice.customer.phone || '',
+      items: completedInvoice.items.map(cartItem => ({
+        item_id: cartItem.inventory_item.item_id,
+        item_name: cartItem.inventory_item.item_name,
+        type: cartItem.inventory_item.type,
+        weight: cartItem.inventory_item.weight,
+        karat: cartItem.inventory_item.karat,
+        selling_price: cartItem.selling_price,
+        making_charges: cartItem.making_charges,
+        quantity: cartItem.quantity
+      })),
+      subtotal: completedInvoice.invoice.subtotal || 0,
+      makingCharges: completedInvoice.invoice.making_charges || 0,
+      totalAmount: completedInvoice.invoice.total_amount || 0,
+      paymentMethod: completedInvoice.invoice.type === InvoicesTypeOptions.cash ? 'Cash' : 'Credit'
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <Button onClick={handleBackToSale} variant="outline" size="sm" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to New Sale
+          </Button>
+          <h1 className="text-3xl font-bold">Invoice Generated</h1>
+        </div>
+        
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <p className="text-green-800 font-medium">
+            ✅ Sale completed successfully! Invoice #{invoiceData.invoiceNumber}
+          </p>
+          <p className="text-green-600 text-sm mt-1">
+            You can now print or download the invoice as PDF.
+          </p>
+        </div>
+
+        <InvoicePrint invoiceData={invoiceData} />
+      </div>
+    )
   }
 
   return (

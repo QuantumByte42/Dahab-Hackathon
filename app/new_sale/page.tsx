@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/contexts/language-context"
-import { ShoppingCart, Plus, Trash2, Printer, Calculator } from "lucide-react"
-import { InventoryTypeOptions, InventoryKaratOptions } from "@/lib/pocketbase-types"
+import { ShoppingCart, Plus, Trash2, Printer, Calculator, ArrowLeft } from "lucide-react"
+import { InventoryTypeOptions, InventoryKaratOptions, InvoicesTypeOptions, InvoicesRecord, CustomersRecord } from "@/lib/pocketbase-types"
 import { get_item, create_customer, create_invoice, update_inventory_quantity, validate_inventory_availability } from "@/lib/api"
+import InvoicePrint from "@/components/invoice-print"
 
 export default function SalesPage() {
   const { isRTL } = useLanguage()
@@ -39,6 +40,21 @@ export default function SalesPage() {
     selling_price: "",
     quantity: "1",
   })
+  const [showInvoice, setShowInvoice] = useState(false)
+  const [completedInvoice, setCompletedInvoice] = useState<{
+    invoice: InvoicesRecord,
+    customer: CustomersRecord,
+    items: Array<{
+      item_id: string;
+      item_name: string;
+      type: string;
+      weight: number;
+      karat: string;
+      selling_price: number;
+      making_charges: number;
+      quantity: number;
+    }>
+  } | null>(null)
 
   useEffect(() => {
     const fetch = async () => {
@@ -174,7 +190,17 @@ export default function SalesPage() {
         }
       }
 
-      // 5. Clear the form
+      // 5. Store completed invoice data for PDF generation
+      setCompletedInvoice({
+        invoice,
+        customer,
+        items: [...saleItems] // Make a copy of current sale items
+      })
+
+      // Show invoice print view
+      setShowInvoice(true)
+
+      // 6. Clear the form
       setSaleItems([])
       setCustomerName("")
       setCustomerPhone("")
@@ -189,8 +215,6 @@ export default function SalesPage() {
         selling_price: "",
         quantity: "1",
       })
-
-      alert(`Sale completed successfully! Invoice: ${invoice.id}`)
       
     } catch (error) {
       console.error("Error completing sale:", error)
@@ -202,6 +226,58 @@ export default function SalesPage() {
     // Here you would generate and print a professional invoice
     console.log("Printing invoice...")
     window.print()
+  }
+
+  const handleBackToSale = () => {
+    setShowInvoice(false)
+    setCompletedInvoice(null)
+  }
+
+  // If showing invoice, render the invoice print component
+  if (showInvoice && completedInvoice) {
+    const invoiceData = {
+      invoiceNumber: completedInvoice.invoice.No || completedInvoice.invoice.id,
+      date: completedInvoice.invoice.created || new Date().toISOString(),
+      customerName: completedInvoice.customer.name,
+      customerPhone: completedInvoice.customer.phone || '',
+      items: completedInvoice.items.map(item => ({
+        item_id: item.item_id,
+        item_name: item.item_name,
+        type: item.type,
+        weight: item.weight,
+        karat: item.karat,
+        selling_price: item.selling_price,
+        making_charges: item.making_charges,
+        quantity: item.quantity
+      })),
+      subtotal: completedInvoice.invoice.subtotal || 0,
+      makingCharges: completedInvoice.invoice.making_charges || 0,
+      totalAmount: completedInvoice.invoice.total_amount || 0,
+      paymentMethod: completedInvoice.invoice.type === 'cash' ? 'Cash' : 'Credit'
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <Button onClick={handleBackToSale} variant="outline" size="sm" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to New Sale
+          </Button>
+          <h1 className="text-3xl font-bold">Invoice Generated</h1>
+        </div>
+        
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <p className="text-green-800 font-medium">
+            ✅ Sale completed successfully! Invoice #{invoiceData.invoiceNumber}
+          </p>
+          <p className="text-green-600 text-sm mt-1">
+            You can now print or download the invoice as PDF.
+          </p>
+        </div>
+
+        <InvoicePrint invoiceData={invoiceData} />
+      </div>
+    )
   }
 
   return (
