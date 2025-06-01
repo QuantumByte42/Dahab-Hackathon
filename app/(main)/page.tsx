@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useActionState, useEffect } from 'react';
-import { login } from "./(auth)/admin/action/auth"
+import { login } from "../(auth)/admin/action/auth"
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';

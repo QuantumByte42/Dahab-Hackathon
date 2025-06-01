@@ -43,48 +43,50 @@ export function Inventory() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Package className="h-6 w-6" />
-          <h1 className="text-3xl font-bold">{t("inventory")}</h1>
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl shadow-lg">
+            <Package className="h-6 w-6 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-amber-600">{t("inventory")}</h1>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
           <Plus className="h-4 w-4" />
           {t("addNewItem")}
         </Button>
       </div>
 
       {/* Search */}
-      <Card>
+      <Card className="border-amber-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
         <CardContent className="pt-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-500" />
             <Input
               placeholder={`${t("search")} ${t("inventory")}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 border-amber-200 focus:border-amber-400 focus:ring-amber-400"
             />
           </div>
         </CardContent>
       </Card>
 
       {/* Inventory Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Inventory Items ({filteredInventory.length})</CardTitle>
+      <Card className="border-amber-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-100">
+          <CardTitle className="text-xl font-bold text-amber-800">Inventory Items ({filteredInventory.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>{t("itemName")}</TableHead>
-                <TableHead>{t("goldType")}</TableHead>
-                <TableHead>{t("karat")}</TableHead>
-                <TableHead>{t("weight")}</TableHead>
-                <TableHead>{t("costPrice")}</TableHead>
-                <TableHead>{t("sellingPrice")}</TableHead>
-                <TableHead>{t("quantity")}</TableHead>
-                <TableHead>{t("actions")}</TableHead>
+              <TableRow className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700">
+                <TableHead className="text-white font-bold">{t("itemName")}</TableHead>
+                <TableHead className="text-white font-bold">{t("goldType")}</TableHead>
+                <TableHead className="text-white font-bold">{t("karat")}</TableHead>
+                <TableHead className="text-white font-bold">{t("weight")}</TableHead>
+                <TableHead className="text-white font-bold">{t("costPrice")}</TableHead>
+                <TableHead className="text-white font-bold">{t("sellingPrice")}</TableHead>
+                <TableHead className="text-white font-bold">{t("quantity")}</TableHead>
+                <TableHead className="text-white font-bold">{t("actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

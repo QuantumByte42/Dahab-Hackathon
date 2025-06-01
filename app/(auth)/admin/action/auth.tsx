@@ -35,7 +35,7 @@ export async function login(state: LoginFormState, formData: FormData) {
     return {
       success: true
     }
-  } catch (err) {
+  } catch {
     return {
       errors: {
         email: ['Invalid email or password. Please try again.'],

@@ -12,7 +12,6 @@ import { useLanguage } from "@/contexts/language-context"
 import { Calculator, Save, Plus, Minus, Search, ArrowLeft } from "lucide-react"
 import { get_inventory, create_customer, create_invoice, update_inventory_quantity, validate_inventory_availability } from "@/lib/api"
 import { InventoryRecord, InvoicesTypeOptions, InvoicesRecord, CustomersRecord } from "@/lib/pocketbase-types"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import InvoicePrint from "@/components/invoice-print"
 
 interface CartItem {
@@ -23,7 +22,7 @@ interface CartItem {
 }
 
 export function NewSale() {
-  const { t, isRTL } = useLanguage()
+  const { t } = useLanguage()
   const [inventory, setInventory] = useState<InventoryRecord[]>([])
   const [filteredInventory, setFilteredInventory] = useState<InventoryRecord[]>([])
   const [searchTerm, setSearchTerm] = useState("")
@@ -310,43 +309,45 @@ export function NewSale() {
           </p>
         </div>
 
-        <InvoicePrint invoiceData={invoiceData} />
+        <InvoicePrint invoice={completedInvoice.invoice} />
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Calculator className="h-6 w-6" />
-        <h1 className="text-3xl font-bold">{t("newSale")}</h1>
+      <div className="flex items-center gap-4">
+        <div className="p-3 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl shadow-lg">
+          <Calculator className="h-6 w-6 text-white" />
+        </div>
+        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-amber-600">{t("newSale")}</h1>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Inventory Selection */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Select Items</CardTitle>
+        <Card className="border-amber-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-100">
+            <CardTitle className="text-xl font-bold text-amber-800">Select Items</CardTitle>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-500" />
               <Input
                 placeholder="Search inventory..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 border-amber-200 focus:border-amber-400 focus:ring-amber-400"
               />
             </div>
           </CardHeader>
           <CardContent className="max-h-96 overflow-y-auto">
             <div className="space-y-2">
               {filteredInventory.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={item.id} className="flex items-center justify-between p-3 border border-amber-200 rounded-lg hover:bg-amber-50 transition-colors duration-200">
                   <div className="flex-1">
-                    <div className="font-medium">{item.item_name}</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="font-medium text-gray-900">{item.item_name}</div>
+                    <div className="text-sm text-amber-600">
                       {item.type} • {item.karat}K • {item.weight}g • Stock: {item.quantity}
                     </div>
-                    <div className="text-sm font-medium">
+                    <div className="text-sm font-medium text-amber-700">
                       {item.selling_price?.toFixed(2)} JOD
                     </div>
                   </div>
@@ -354,6 +355,7 @@ export function NewSale() {
                     size="sm" 
                     onClick={() => addToCart(item)}
                     disabled={!item.quantity || item.quantity <= 0}
+                    className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -366,21 +368,21 @@ export function NewSale() {
         {/* Cart and Customer Details */}
         <div className="space-y-6">
           {/* Cart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Cart ({cart.length} items)</CardTitle>
+          <Card className="border-amber-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-100">
+              <CardTitle className="text-xl font-bold text-amber-800">Cart ({cart.length} items)</CardTitle>
             </CardHeader>
             <CardContent>
               {cart.length === 0 ? (
-                <p className="text-muted-foreground text-center py-4">No items in cart</p>
+                <p className="text-amber-600 text-center py-4">No items in cart</p>
               ) : (
                 <div className="space-y-4">
                   {cart.map((cartItem) => (
-                    <div key={cartItem.inventory_item.id} className="border rounded-lg p-3">
+                    <div key={cartItem.inventory_item.id} className="border border-amber-200 rounded-lg p-3 hover:bg-amber-50 transition-colors duration-200">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="font-medium">{cartItem.inventory_item.item_name}</div>
-                          <div className="text-sm text-muted-foreground">
+                          <div className="font-medium text-gray-900">{cartItem.inventory_item.item_name}</div>
+                          <div className="text-sm text-amber-600">
                             {cartItem.inventory_item.type} • {cartItem.inventory_item.karat}K
                           </div>
                         </div>
@@ -388,6 +390,7 @@ export function NewSale() {
                           size="sm" 
                           variant="outline"
                           onClick={() => removeFromCart(cartItem.inventory_item.id)}
+                          className="border-amber-300 text-amber-700 hover:bg-amber-100 hover:border-amber-400"
                         >
                           <Minus className="h-4 w-4" />
                         </Button>
@@ -465,61 +468,65 @@ export function NewSale() {
           </Card>
 
           {/* Customer Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Customer Details</CardTitle>
+          <Card className="border-amber-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-100">
+              <CardTitle className="text-xl font-bold text-amber-800">Customer Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="customer_name">Name *</Label>
+                  <Label htmlFor="customer_name" className="text-amber-700 font-medium">Name *</Label>
                   <Input
                     id="customer_name"
                     value={customerData.name}
                     onChange={(e) => setCustomerData({ ...customerData, name: e.target.value })}
                     placeholder="Customer name"
                     required
+                    className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="customer_phone">Phone</Label>
+                  <Label htmlFor="customer_phone" className="text-amber-700 font-medium">Phone</Label>
                   <Input
                     id="customer_phone"
                     value={customerData.phone}
                     onChange={(e) => setCustomerData({ ...customerData, phone: e.target.value })}
                     placeholder="Phone number"
+                    className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
                   />
                 </div>
               </div>
               
               <div>
-                <Label htmlFor="customer_email">Email</Label>
+                <Label htmlFor="customer_email" className="text-amber-700 font-medium">Email</Label>
                 <Input
                   id="customer_email"
                   type="email"
                   value={customerData.email}
                   onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
                   placeholder="Email address"
+                  className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
                 />
               </div>
               
               <div>
-                <Label htmlFor="customer_address">Address</Label>
+                <Label htmlFor="customer_address" className="text-amber-700 font-medium">Address</Label>
                 <Input
                   id="customer_address"
                   value={customerData.address}
                   onChange={(e) => setCustomerData({ ...customerData, address: e.target.value })}
                   placeholder="Address"
+                  className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
                 />
               </div>
 
               <div>
-                <Label htmlFor="payment_method">Payment Method</Label>
+                <Label htmlFor="payment_method" className="text-amber-700 font-medium">Payment Method</Label>
                 <Select
                   value={paymentMethod}
                   onValueChange={(value: InvoicesTypeOptions) => setPaymentMethod(value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-amber-200 focus:border-amber-400 focus:ring-amber-400">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -533,12 +540,17 @@ export function NewSale() {
 
           {/* Complete Sale */}
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={() => setCart([])}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setCart([])}
+              className="border-amber-300 text-amber-700 hover:bg-amber-100 hover:border-amber-400"
+            >
               Clear Cart
             </Button>
             <Button 
               onClick={handleSubmit} 
-              className="gap-2"
+              className="gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
               disabled={loading || cart.length === 0}
             >
               <Save className="h-4 w-4" />

@@ -84,55 +84,58 @@ export function Transactions() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8 p-6">
         <div className="flex items-center gap-2">
-          <History className="h-6 w-6" />
-          <h1 className="text-3xl font-bold">{t("transactions")}</h1>
+          <History className="h-6 w-6 text-amber-600" />
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">{t("transactions")}</h1>
         </div>
-        <div className="text-center py-8">Loading transactions...</div>
+        <div className="text-center py-8 text-amber-600">Loading transactions...</div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 p-6 min-h-screen bg-gradient-to-br from-amber-25 via-white to-yellow-25">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <History className="h-6 w-6" />
-          <h1 className="text-3xl font-bold">{t("transactions")}</h1>
+          <History className="h-6 w-6 text-amber-600" />
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">{t("transactions")}</h1>
         </div>
-        <Button onClick={exportTransactions} className="gap-2">
+        <Button 
+          onClick={exportTransactions} 
+          className="gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0"
+        >
           <Download className="h-4 w-4" />
           Export
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
+            <CardTitle className="text-sm font-medium text-amber-800">Total Transactions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{filteredTransactions.length}</div>
+            <div className="text-3xl font-bold text-amber-900">{filteredTransactions.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
+            <CardTitle className="text-sm font-medium text-amber-800">Total Amount</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-3xl font-bold text-amber-900">
               {totalAmount.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Gold Weight</CardTitle>
+            <CardTitle className="text-sm font-medium text-amber-800">Total Gold Weight</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-3xl font-bold text-amber-900">
               {totalWeight.toFixed(1)} {isRTL ? "جرام" : "grams"}
             </div>
           </CardContent>
@@ -140,14 +143,14 @@ export function Transactions() {
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
+      <Card className="border-amber-200 bg-gradient-to-br from-white to-amber-50">
+        <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
+          <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+            <Filter className="h-5 w-5" />
             Filters
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <div className="grid gap-4 md:grid-cols-5">
             <div className="space-y-2">
               <Label>Search</Label>
@@ -217,7 +220,7 @@ export function Transactions() {
                   setPaymentFilter("")
                   setGoldTypeFilter("")
                 }}
-                className="w-full"
+                className="w-full border-amber-300 text-amber-700 hover:bg-amber-50 hover:text-amber-800"
               >
                 Clear Filters
               </Button>
@@ -227,11 +230,11 @@ export function Transactions() {
       </Card>
 
       {/* Transactions Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Transaction History ({filteredTransactions.length})</CardTitle>
+      <Card className="border-amber-200 bg-gradient-to-br from-white to-amber-50">
+        <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
+          <CardTitle className="text-xl font-semibold">Transaction History ({filteredTransactions.length})</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <Table>
             <TableHeader>
               <TableRow>

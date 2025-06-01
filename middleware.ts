@@ -19,7 +19,7 @@ export default async function middleware(req: NextRequest) {
       }
     }
     // If not authenticated, redirect to home page (which has the login form)
-    return NextResponse.redirect(new URL("/login", req.url))
+    return NextResponse.redirect(new URL("/", req.url))
 }
  
 // Routes Middleware should not run on

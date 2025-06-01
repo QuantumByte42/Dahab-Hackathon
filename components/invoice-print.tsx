@@ -3,8 +3,7 @@
 
 import React, { useRef, forwardRef } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Download, Printer, AlertCircle } from 'lucide-react'
+import { Download, Printer } from 'lucide-react'
 import { generatePDFWithFallback } from '@/utils/pdf-fallback'
 import { InvoicesRecord } from '@/lib/pocketbase-types'
 
@@ -17,6 +16,18 @@ interface InvoicePrintProps {
 // Printable Invoice Component
 const PrintableInvoice = forwardRef<HTMLDivElement, { invoice: InvoicesRecord }>(
   ({ invoice: invoiceData }, ref) => {
+    // Type the items array properly
+    const items = (invoiceData.items as unknown as Array<{
+      item_id?: string;
+      item_name?: string;
+      type?: string;
+      weight?: number;
+      karat?: string;
+      quantity?: number;
+      selling_price?: number;
+      making_charges?: number;
+    }>) || []
+
     return (
       <div ref={ref} className="bg-white p-8 max-w-4xl mx-auto" style={{ fontFamily: 'Arial, sans-serif' }}>
         {/* Header */}
@@ -70,18 +81,18 @@ const PrintableInvoice = forwardRef<HTMLDivElement, { invoice: InvoicesRecord }>
               </tr>
             </thead>
             <tbody>
-              {invoiceData.items?.map((item, index) => (
+              {items?.map((item, index) => (
                 <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="border border-gray-300 px-3 py-2 text-sm font-mono">{item.item_id}</td>
-                  <td className="border border-gray-300 px-3 py-2 text-sm">{item.item_name}</td>
-                  <td className="border border-gray-300 px-3 py-2 text-sm">{item.type}</td>
-                  <td className="border border-gray-300 px-3 py-2 text-sm">{item.weight.toFixed(2)}</td>
-                  <td className="border border-gray-300 px-3 py-2 text-sm">{item.karat}</td>
-                  <td className="border border-gray-300 px-3 py-2 text-sm text-center">{item.quantity}</td>
-                  <td className="border border-gray-300 px-3 py-2 text-sm text-right">{item.selling_price.toFixed(2)} JOD</td>
-                  <td className="border border-gray-300 px-3 py-2 text-sm text-right">{item.making_charges.toFixed(2)} JOD</td>
+                  <td className="border border-gray-300 px-3 py-2 text-sm font-mono">{item.item_id || ''}</td>
+                  <td className="border border-gray-300 px-3 py-2 text-sm">{item.item_name || ''}</td>
+                  <td className="border border-gray-300 px-3 py-2 text-sm">{item.type || ''}</td>
+                  <td className="border border-gray-300 px-3 py-2 text-sm">{(item.weight || 0).toFixed(2)}</td>
+                  <td className="border border-gray-300 px-3 py-2 text-sm">{item.karat || ''}</td>
+                  <td className="border border-gray-300 px-3 py-2 text-sm text-center">{item.quantity || 0}</td>
+                  <td className="border border-gray-300 px-3 py-2 text-sm text-right">{(item.selling_price || 0).toFixed(2)} JOD</td>
+                  <td className="border border-gray-300 px-3 py-2 text-sm text-right">{(item.making_charges || 0).toFixed(2)} JOD</td>
                   <td className="border border-gray-300 px-3 py-2 text-sm text-right font-medium">
-                    {((item.selling_price + item.making_charges) * item.quantity).toFixed(2)} JOD
+                    {(((item.selling_price || 0) + (item.making_charges || 0)) * (item.quantity || 0)).toFixed(2)} JOD
                   </td>
                 </tr>
               ))}
