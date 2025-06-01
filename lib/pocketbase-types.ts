@@ -11,12 +11,9 @@ export enum Collections {
 	Mfas = "_mfas",
 	Otps = "_otps",
 	Superusers = "_superusers",
-	Customers = "customers",
-	Employees = "employees",
+	Admins = "admins",
 	Inventory = "inventory",
 	Invoices = "invoices",
-	Users = "users",
-	Vendors = "vendors",
 }
 
 // Alias types for improved usability
@@ -95,33 +92,22 @@ export type SuperusersRecord = {
 	verified?: boolean
 }
 
-export type CustomersRecord = {
-	address?: string
-	created?: IsoDateString
-	email?: string
-	id: string
-	last_purchase?: IsoDateString
-	name: string
-	phone?: string
-	purchase_count?: number
-	total_purchases?: number
-	updated?: IsoDateString
+export enum AdminsRoleOptions {
+	"manager" = "manager",
+	"sales" = "sales",
 }
-
-export enum EmployeesRoleOptions {
-	"Manager" = "Manager",
-	"Cashier" = "Cashier",
-}
-export type EmployeesRecord = {
+export type AdminsRecord = {
+	avatar?: string
 	created?: IsoDateString
-	email?: string
+	email: string
+	emailVisibility?: boolean
 	id: string
-	is_active?: boolean
-	merchant_id?: string
 	name?: string
-	phone?: string
-	role?: EmployeesRoleOptions
+	password: string
+	role?: AdminsRoleOptions
+	tokenKey: string
 	updated?: IsoDateString
+	verified?: boolean
 }
 
 export enum InventoryTypeOptions {
@@ -132,6 +118,7 @@ export enum InventoryTypeOptions {
 	"Pendant" = "Pendant",
 	"Chain" = "Chain",
 	"Bangle" = "Bangle",
+	"Crown" = "Crown",
 }
 
 export enum InventoryKaratOptions {
@@ -149,14 +136,16 @@ export type InventoryRecord = {
 	id: string
 	item_id: string
 	item_name: string
-	karat: InventoryKaratOptions | string
-	quantity: number
-	selling_price: number
-	type: InventoryTypeOptions | string
+	karat: InventoryKaratOptions
+	quantity?: number
+	selling_price?: number
+	type: InventoryTypeOptions
 	updated?: IsoDateString
-	vendor?: RecordIdString
+	vendor_address?: string
+	vendor_contact_person?: string
+	vendor_name?: string
+	vendor_phone?: string
 	weight: number
-	expand?: {vendor?: VendorsRecord}
 }
 
 export enum InvoicesTypeOptions {
@@ -164,36 +153,16 @@ export enum InvoicesTypeOptions {
 	"credit" = "credit",
 }
 export type InvoicesRecord<Titems = unknown> = {
+	No?: string
 	created?: IsoDateString
-	customer: RecordIdString
+	customer_name?: string
+	customer_phone?: string
 	id: string
-	No: string
 	items: null | Titems
-	subtotal?: number
 	making_charges?: number
+	subtotal?: number
 	total_amount?: number
-	type: InvoicesTypeOptions
-	updated?: IsoDateString
-	expand?: {customer?: CustomersRecord}
-}
-
-export type UsersRecord = {
-	avatar?: string
-	created?: IsoDateString
-	email: string
-	emailVisibility?: boolean
-	id: string
-	name?: string
-	password: string
-	tokenKey: string
-	updated?: IsoDateString
-	verified?: boolean
-}
-
-export type VendorsRecord = {
-	created?: IsoDateString
-	id: string
-	name?: string
+	type?: InvoicesTypeOptions
 	updated?: IsoDateString
 }
 
@@ -203,12 +172,9 @@ export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRec
 export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
-export type CustomersResponse<Texpand = unknown> = Required<CustomersRecord> & BaseSystemFields<Texpand>
-export type EmployeesResponse<Texpand = unknown> = Required<EmployeesRecord> & BaseSystemFields<Texpand>
+export type AdminsResponse<Texpand = unknown> = Required<AdminsRecord> & AuthSystemFields<Texpand>
 export type InventoryResponse<Texpand = unknown> = Required<InventoryRecord> & BaseSystemFields<Texpand>
 export type InvoicesResponse<Titems = unknown, Texpand = unknown> = Required<InvoicesRecord<Titems>> & BaseSystemFields<Texpand>
-export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
-export type VendorsResponse<Texpand = unknown> = Required<VendorsRecord> & BaseSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
 
@@ -218,12 +184,9 @@ export type CollectionRecords = {
 	_mfas: MfasRecord
 	_otps: OtpsRecord
 	_superusers: SuperusersRecord
-	customers: CustomersRecord
-	employees: EmployeesRecord
+	admins: AdminsRecord
 	inventory: InventoryRecord
 	invoices: InvoicesRecord
-	users: UsersRecord
-	vendors: VendorsRecord
 }
 
 export type CollectionResponses = {
@@ -232,12 +195,9 @@ export type CollectionResponses = {
 	_mfas: MfasResponse
 	_otps: OtpsResponse
 	_superusers: SuperusersResponse
-	customers: CustomersResponse
-	employees: EmployeesResponse
+	admins: AdminsResponse
 	inventory: InventoryResponse
 	invoices: InvoicesResponse
-	users: UsersResponse
-	vendors: VendorsResponse
 }
 
 // Type for usage with type asserted PocketBase instance
@@ -249,10 +209,7 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: '_mfas'): RecordService<MfasResponse>
 	collection(idOrName: '_otps'): RecordService<OtpsResponse>
 	collection(idOrName: '_superusers'): RecordService<SuperusersResponse>
-	collection(idOrName: 'customers'): RecordService<CustomersResponse>
-	collection(idOrName: 'employees'): RecordService<EmployeesResponse>
+	collection(idOrName: 'admins'): RecordService<AdminsResponse>
 	collection(idOrName: 'inventory'): RecordService<InventoryResponse>
 	collection(idOrName: 'invoices'): RecordService<InvoicesResponse>
-	collection(idOrName: 'users'): RecordService<UsersResponse>
-	collection(idOrName: 'vendors'): RecordService<VendorsResponse>
 }

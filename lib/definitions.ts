@@ -15,3 +15,15 @@ export type LoginFormState =
       redirect?: string
     }
   | undefined
+
+export interface InvoiceItem {
+  item_id: string
+  item_name: string
+  type: string
+  weight: number
+  karat: string
+  selling_price: number
+  making_charges: number
+  quantity: number
+}
+

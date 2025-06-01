@@ -23,7 +23,7 @@ export async function get_inventory() {
     return ([])
 }
 
-export async function get_item(itemId: string) {
+export async function get_item(itemId: string): Promise<InventoryRecord> {
     const pb = getPocketBase()
 
     try {
@@ -40,33 +40,6 @@ export async function get_item(itemId: string) {
         }
     } catch {
         return (null)
-    }
-}
-
-export async function create_customer(customerData: Partial<CustomersRecord>) {
-    const pb = getPocketBase()
-    
-    try {
-        // Check if customer already exists by phone or email
-        let existingCustomer = null;
-        if (customerData.phone) {
-            try {
-                existingCustomer = await pb.collection("customers")
-                    .getFirstListItem<CustomersRecord>(`phone = '${customerData.phone}'`)
-            } catch {
-                // Customer doesn't exist, which is fine
-            }
-        }
-        
-        if (existingCustomer) {
-            return existingCustomer;
-        }
-        
-        const record = await pb.collection("customers").create<CustomersRecord>(customerData)
-        return record
-    } catch (error) {
-        console.error("Error creating customer:", error)
-        return null
     }
 }
 
