@@ -1,5 +1,5 @@
 import { getPocketBase } from "./pocketbase";
-import { CustomersRecord, InventoryRecord, InvoicesRecord, InvoicesTypeOptions } from "./pocketbase-types";
+import { CustomersRecord, InventoryRecord, InvoicesRecord, InvoicesResponse, InvoicesTypeOptions } from "./pocketbase-types";
 
 export async function get_customers() {
     const pb = getPocketBase()
@@ -23,7 +23,7 @@ export async function get_inventory() {
     return ([])
 }
 
-export async function get_item(itemId: string): Promise<InventoryRecord> {
+export async function get_item(itemId: string): Promise<InventoryRecord | null> {
     const pb = getPocketBase()
 
     try {
@@ -39,7 +39,7 @@ export async function get_item(itemId: string): Promise<InventoryRecord> {
             return (item)
         }
     } catch {
-        return (null)
+        return null
     }
 }
 
@@ -67,16 +67,19 @@ export async function create_invoice(invoiceData: Partial<InvoicesRecord>) {
         const record = await pb.collection("invoices").create<InvoicesRecord>(formattedData)
         console.log('Invoice created successfully:', record)
         return record
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error creating invoice:", error)
         console.error("Invoice data that failed:", invoiceData)
         
         // Log detailed error information
-        if (error?.response?.data) {
-            console.error("PocketBase error details:", error.response.data)
+        if (error && typeof error === 'object' && 'response' in error) {
+            const responseError = error as { response?: { data?: unknown } }
+            if (responseError.response?.data) {
+                console.error("PocketBase error details:", responseError.response.data)
+            }
         }
-        if (error?.data) {
-            console.error("Error data:", error.data)
+        if (error && typeof error === 'object' && 'data' in error) {
+            console.error("Error data:", (error as { data: unknown }).data)
         }
         
         return null
@@ -102,12 +105,13 @@ export async function update_inventory_quantity(itemId: string, quantitySold: nu
             throw new Error(`Item with ID ${itemId} not found`)
         }
         
-        if (item.quantity < quantitySold) {
-            throw new Error(`Insufficient inventory. Available: ${item.quantity}, Requested: ${quantitySold}`)
+        const itemQuantity = item.quantity ?? 0
+        if (itemQuantity < quantitySold) {
+            throw new Error(`Insufficient inventory. Available: ${itemQuantity}, Requested: ${quantitySold}`)
         }
         
         // Update quantity
-        const newQuantity = item.quantity - quantitySold
+        const newQuantity = itemQuantity - quantitySold
         const updatedItem = await pb.collection("inventory").update(item.id, {
             quantity: newQuantity
         })
@@ -152,11 +156,12 @@ export async function validate_inventory_availability(items: Array<{item_id: str
                 continue
             }
             
-            if (inventoryItem.quantity < item.quantity) {
+            const inventoryQuantity = inventoryItem.quantity ?? 0
+            if (inventoryQuantity < item.quantity) {
                 validationResults.push({
                     item_id: item.item_id,
                     valid: false,
-                    message: `Insufficient inventory for ${item.item_id}. Available: ${inventoryItem.quantity}, Requested: ${item.quantity}`
+                    message: `Insufficient inventory for ${item.item_id}. Available: ${inventoryQuantity}, Requested: ${item.quantity}`
                 })
                 continue
             }
@@ -195,7 +200,7 @@ export async function get_transactions(): Promise<TransactionData[]> {
     
     try {
         const invoices = await pb.collection("invoices")
-                                .getList<InvoicesRecord>(1, 100, {
+                                .getList<InvoicesResponse>(1, 100, {
                                     expand: "customer",
                                     sort: "-created"
                                 });
@@ -203,7 +208,7 @@ export async function get_transactions(): Promise<TransactionData[]> {
         const transactions: TransactionData[] = []
         
         for (const invoice of invoices.items) {
-            const customer = invoice.expand?.customer
+            const customer = (invoice as { expand?: { customer?: CustomersRecord } }).expand?.customer
             const items = (invoice.items as unknown as Array<{
                 item_id?: string;
                 item_name?: string;
@@ -306,7 +311,7 @@ export async function get_employees() {
     }
 }
 
-export async function create_employee(employeeData: any) {
+export async function create_employee(employeeData: Record<string, unknown>) {
     const pb = getPocketBase()
     
     try {
@@ -318,7 +323,17 @@ export async function create_employee(employeeData: any) {
     }
 }
 
-export async function create_inventory_item(inventoryData: any) {
+export async function create_customer(customerData: { name: string; phone?: string }) {
+    // Since there's no separate customers collection, we'll just return the customer data
+    // The customer info is stored directly in the invoice as customer_name and customer_phone
+    return {
+        id: `customer_${Date.now()}`, // Generate a temporary ID
+        name: customerData.name,
+        phone: customerData.phone || ""
+    }
+}
+
+export async function create_inventory_item(inventoryData: Record<string, unknown>) {
     const pb = getPocketBase()
     
     try {

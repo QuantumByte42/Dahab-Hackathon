@@ -38,8 +38,9 @@ export default function InvoicesPage() {
   }, [])
 
   const filteredInvoices = invoices.filter((invoice) => {
+    const expandedInvoice = invoice as { expand?: { customer?: { name?: string } } }
     const matchesSearch =
-      invoice.expand?.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      expandedInvoice.expand?.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       invoice.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       invoice.id.toLowerCase().includes(searchTerm.toLowerCase())
 
@@ -68,26 +69,34 @@ export default function InvoicesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 p-6 bg-gradient-to-br from-amber-25 via-white to-yellow-25 min-h-screen">
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Loading invoices...</div>
+          <div className="text-lg text-amber-700">Loading invoices...</div>
         </div>
       ) : (
-        <>          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <History className="h-6 w-6" />
-              <h1 className="text-3xl font-bold">{t("invoices")}</h1>
+        <>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-xl shadow-lg">
+                <History className="h-6 w-6 text-white" />
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
+                {t("invoices")}
+              </h1>
             </div>
-            <Button onClick={exportTransactions} className="gap-2">
+            <Button 
+              onClick={exportTransactions} 
+              className="gap-2 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+            >
               <Download className="h-4 w-4" />
               Export
             </Button>
           </div>
 
           {/* Summary Cards */}
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
+          <div className="grid gap-6 md:grid-cols-3">
+            <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Total Invoices</CardTitle>
               </CardHeader>
@@ -95,22 +104,22 @@ export default function InvoicesPage() {
                 <div className="text-2xl font-bold">{filteredInvoices.length}</div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
+                <CardTitle className="text-sm font-medium text-amber-800">Total Amount</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold text-amber-900">
                   {totalAmount.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Average Invoice Value</CardTitle>
+                <CardTitle className="text-sm font-medium text-amber-800">Average Invoice Value</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold text-amber-900">
                   {filteredInvoices.length > 0 ? (totalAmount / filteredInvoices.length).toFixed(2) : '0.00'} {isRTL ? "د.أ" : "JOD"}
                 </div>
               </CardContent>
@@ -118,45 +127,45 @@ export default function InvoicesPage() {
           </div>
 
       {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold">
             <Filter className="h-4 w-4" />
             Filters
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
-              <Label>Search</Label>
+              <Label className="text-amber-700 font-medium">Search</Label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-600" />
                 <Input
                   placeholder="Search invoices..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 border-amber-200 focus:ring-amber-400 focus:border-amber-400 bg-white/70"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Date</Label>
+              <Label className="text-amber-700 font-medium">Date</Label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-600" />
                 <Input
                   type="date"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 border-amber-200 focus:ring-amber-400 focus:border-amber-400 bg-white/70"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Payment Method</Label>
+              <Label className="text-amber-700 font-medium">Payment Method</Label>
               <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="border-amber-200 focus:ring-amber-400 focus:border-amber-400 bg-white/70">
                   <SelectValue placeholder="All methods" />
                 </SelectTrigger>
                 <SelectContent>
@@ -177,7 +186,7 @@ export default function InvoicesPage() {
                   setDateFilter("")
                   setPaymentFilter("")
                 }}
-                className="w-full"
+                className="w-full border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400"
               >
                 Clear Filters
               </Button>
@@ -185,25 +194,27 @@ export default function InvoicesPage() {
           </div>
         </CardContent>
       </Card>          {/* Invoices Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Invoice History ({filteredInvoices.length})</CardTitle>
+          <Card className="border-amber-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-100 rounded-t-lg">
+              <CardTitle className="text-amber-800 font-semibold">Invoice History ({filteredInvoices.length})</CardTitle>
             </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Invoice ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Payment Type</TableHead>
-                <TableHead>Date</TableHead>
+              <TableRow className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700">
+                <TableHead className="text-white font-semibold">Invoice ID</TableHead>
+                <TableHead className="text-white font-semibold">Customer</TableHead>
+                <TableHead className="text-white font-semibold">Payment Type</TableHead>
+                <TableHead className="text-white font-semibold">Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredInvoices.map((invoice: InvoicesRecord) => (
+              {filteredInvoices.map((invoice: InvoicesRecord) => {
+                const expandedInvoice = invoice as { expand?: { customer?: { name?: string } } }
+                return (
                 <TableRow key={invoice.id}>
                   <TableCell className="font-mono text-sm">{invoice.id}</TableCell>
-                  <TableCell className="font-medium">{invoice.expand?.customer?.name || 'N/A'}</TableCell>
+                  <TableCell className="font-medium">{expandedInvoice.expand?.customer?.name || 'N/A'}</TableCell>
                   <TableCell>
                     <Badge variant={getPaymentMethodBadge(invoice.type || 'cash')}>
                       {t(invoice.type || 'cash')}
@@ -220,7 +231,8 @@ export default function InvoicesPage() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+                )
+              })}
             </TableBody>
           </Table>
         </CardContent>

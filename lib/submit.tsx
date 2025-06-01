@@ -3,7 +3,7 @@ import { getPocketBase } from "./pocketbase";
 export async function submitForm<T>(
   recordId: string | null,
   collection: string,
-  form: FormData | {[key: string]: any | T},
+  form: FormData | Record<string, unknown>,
 ) : Promise<{record:Awaited<T> | null, msg: string }> {
   console.log(form)
   try {

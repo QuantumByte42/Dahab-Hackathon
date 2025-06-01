@@ -152,6 +152,14 @@ export enum InvoicesTypeOptions {
 	"cash" = "cash",
 	"credit" = "credit",
 }
+
+// Customer type for direct customer data (not a collection)
+export type CustomersRecord = {
+	id: string
+	name: string
+	phone?: string
+}
+
 export type InvoicesRecord<Titems = unknown> = {
 	No?: string
 	created?: IsoDateString

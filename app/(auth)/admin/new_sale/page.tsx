@@ -9,11 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/contexts/language-context"
-import { ShoppingCart, Plus, Trash2, Printer, Calculator, ArrowLeft } from "lucide-react"
-import { InventoryTypeOptions, InventoryKaratOptions, InvoicesRecord, InventoryRecord } from "@/lib/pocketbase-types"
+import { ShoppingCart, Plus, Trash2, Calculator, ArrowLeft } from "lucide-react"
+import { InventoryTypeOptions, InventoryKaratOptions, InvoicesRecord } from "@/lib/pocketbase-types"
 import { get_item, create_invoice, update_inventory_quantity, validate_inventory_availability } from "@/lib/api"
 import InvoicePrint from "@/components/invoice-print"
-import { getPocketBase } from "@/lib/pocketbase"
 
 export default function SalesPage() {
   const { isRTL } = useLanguage()
@@ -63,9 +62,9 @@ export default function SalesPage() {
         weight: item.weight ? item.weight.toString() : "",
         karat: item.karat ? item.karat.toString().replace('E', '') : "",
         selling_price: item.selling_price ? item.selling_price.toString() : "",
-        quantity: item.quantity > 0 ? "1" : "0",
+        quantity: (item.quantity ?? 0) > 0 ? "1" : "0",
       })
-      setOutOfStock(item.quantity <= 0)
+      setOutOfStock((item.quantity ?? 0) <= 0)
     }
     fetch()
     console.log(`currentItemId: ${currentItem.item_id}`)
@@ -201,12 +200,6 @@ export default function SalesPage() {
     setLoading(false)
   }
 
-  const printInvoice = () => {
-    // Here you would generate and print a professional invoice
-    console.log("Printing invoice...")
-    window.print()
-  }
-
   const handleBackToSale = () => {
     setShowInvoice(false)
     setCompletedInvoice(null)
@@ -243,22 +236,28 @@ export default function SalesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 p-6 bg-gradient-to-br from-amber-25 via-white to-yellow-25 min-h-screen">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <ShoppingCart className="h-6 w-6" />
-          <h1 className="text-3xl font-bold">Sales Transaction</h1>
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-xl shadow-lg">
+            <ShoppingCart className="h-6 w-6 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
+            Sales Transaction
+          </h1>
         </div>
-        <div className="text-sm text-muted-foreground">{new Date().toLocaleString(isRTL ? "ar-JO" : "en-US")}</div>
+        <div className="text-sm text-amber-600 font-medium px-4 py-2 bg-amber-50 rounded-lg border border-amber-200">
+          {new Date().toLocaleString(isRTL ? "ar-JO" : "en-US")}
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Customer Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Customer Information</CardTitle>
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
+            <CardTitle className="text-lg font-semibold">Customer Information</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 p-6">
             <div className="space-y-2">
               <Label htmlFor="customer_name">Customer Name</Label>
               <Input
@@ -450,10 +449,10 @@ export default function SalesPage() {
               <Button
                 onClick={handleCompleteSale}
                 className="w-full gap-2"
-                disabled={saleItems.length === 0 || !customer.name || !transactionType}
+                disabled={saleItems.length === 0 || !customer.name || !transactionType || loading}
               >
                 <Calculator className="h-4 w-4" />
-                Complete Sale
+                {loading ? "Processing..." : "Complete Sale"}
               </Button>
               {/* <Button
                 onClick={printInvoice}

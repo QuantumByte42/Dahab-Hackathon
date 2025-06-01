@@ -25,19 +25,23 @@ export function Settings() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <SettingsIcon className="h-6 w-6" />
-        <h1 className="text-3xl font-bold">{t("settings")}</h1>
+    <div className="space-y-8 p-6 bg-gradient-to-br from-amber-25 via-white to-yellow-25 min-h-screen">
+      <div className="flex items-center gap-3">
+        <div className="p-3 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-xl shadow-lg">
+          <SettingsIcon className="h-6 w-6 text-white" />
+        </div>
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
+          {t("settings")}
+        </h1>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Gold Prices */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("goldPrices")}</CardTitle>
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
+            <CardTitle className="text-xl font-semibold">{t("goldPrices")}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 p-6">
             {Object.entries(goldPrices).map(([karat, price]) => (
               <div key={karat} className="space-y-2">
                 <Label htmlFor={`karat-${karat}`}>{karat}K Gold (JOD per gram)</Label>
@@ -59,11 +63,11 @@ export function Settings() {
         </Card>
 
         {/* General Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>General Settings</CardTitle>
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
+            <CardTitle className="text-xl font-semibold">General Settings</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 p-6">
             <div className="space-y-2">
               <Label htmlFor="tax-rate">{t("taxRate")}</Label>
               <Input
@@ -92,7 +96,10 @@ export function Settings() {
       </div>
 
       <div className="flex justify-end">
-        <Button onClick={handleSave} className="gap-2">
+        <Button 
+          onClick={handleSave} 
+          className="gap-2 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+        >
           <Save className="h-4 w-4" />
           {t("save")}
         </Button>

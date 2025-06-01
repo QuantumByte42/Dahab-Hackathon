@@ -130,7 +130,7 @@ export const testPDFGeneration = async () => {
     console.log('✅ Invoice element found, generating PDF...');
     
     const filename = `test-invoice-${new Date().getTime()}.pdf`;
-    const success = await generatePDFWithFallback(invoiceElement, filename);
+    const success = await generatePDFWithFallback(invoiceElement as HTMLElement, filename);
     
     if (success) {
       console.log('✅ PDF generated successfully!');
@@ -144,14 +144,15 @@ export const testPDFGeneration = async () => {
     
   } catch (error) {
     console.error('❌ PDF test failed:', error);
-    alert(`❌ PDF test failed: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    alert(`❌ PDF test failed: ${errorMessage}`);
     return false;
   }
 };
 
 // Auto-test function for browser console
 if (typeof window !== 'undefined') {
-  window.dahab_pdf_test = {
+  (window as typeof window & { dahab_pdf_test?: object }).dahab_pdf_test = {
     generateTestData: generateTestInvoiceData,
     generateTestItems: generateTestSaleItems,
     testPDF: testPDFGeneration
@@ -163,8 +164,10 @@ if (typeof window !== 'undefined') {
   console.log('   window.dahab_pdf_test.testPDF() - Test PDF generation');
 }
 
-export default {
+const pdfTestUtils = {
   generateTestInvoiceData,
   generateTestSaleItems,
   testPDFGeneration
 };
+
+export default pdfTestUtils;
