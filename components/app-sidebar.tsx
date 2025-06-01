@@ -22,42 +22,42 @@ import { useState } from "react"
 const navigationItems = [
   {
     title: "dashboard",
-    url: "/",
+    url: "/admin/",
     icon: BarChart3,
   },
   {
     title: "newSale",
-    url: "/new_sale",
+    url: "/admin/new_sale",
     icon: Plus,
   },
   {
     title: "inventory",
-    url: "/inventory",
+    url: "/admin/inventory",
     icon: Package,
   },
   {
     title: "customers",
-    url: "/customers",
+    url: "/admin/customers",
     icon: Users,
   },
   {
     title: "Invoices",
-    url: "/invoices",
+    url: "/admin/invoices",
     icon: History,
   },
   {
     title: "User Management",
-    url: "/user_management",
+    url: "/admin/user_management",
     icon: Users,
   },
   {
     title: "Reports",
-    url: "/reports",
+    url: "/admin/reports",
     icon: FileText,
   },
   {
     title: "settings",
-    url: "/settings",
+    url: "/admin/settings",
     icon: Settings,
   },
 ]
