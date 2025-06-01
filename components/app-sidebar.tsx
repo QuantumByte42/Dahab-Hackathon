@@ -61,19 +61,23 @@ export function AppSidebar() {
   const { t } = useLanguage()
   const [currentPage, setCurrentPage] = useState("dashboard")
   const router = useRouter()
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b p-4">
-        <div className="flex items-center gap-2">
-          <ShoppingCart className="h-6 w-6 text-yellow-600" />
-          <span className="font-bold text-lg">Gold POS</span>
+    <Sidebar className="border-r border-amber-100">
+      <SidebarHeader className="border-b border-amber-100 p-4 bg-gradient-to-r from-amber-50 to-yellow-50">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-lg shadow-sm">
+            <ShoppingCart className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <span className="font-bold text-lg text-gray-900">Gold POS</span>
+            <p className="text-xs text-amber-600 font-medium">Management System</p>
+          </div>
         </div>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-white">
         <SidebarGroup>
-          <SidebarGroupLabel>{t("navigation")}</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-amber-700 font-semibold">{t("navigation")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.map((item) => (
@@ -87,11 +91,11 @@ export function AppSidebar() {
                       if (currentPage !== page)
                         router.push(item.url)
                     }}
-
+                    className="group data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-100 data-[state=active]:to-yellow-100 data-[state=active]:text-amber-800 data-[state=active]:border-l-4 data-[state=active]:border-amber-500 hover:bg-amber-50 transition-all duration-200"
                   >
-                    <div className="flex items-center gap-2 cursor-pointer">
-                      <item.icon className="h-4 w-4" />
-                      <span>{t(item.title)}</span>
+                    <div className="flex items-center gap-3 cursor-pointer">
+                      <item.icon className="h-4 w-4 group-data-[state=active]:text-amber-600" />
+                      <span className="font-medium">{t(item.title)}</span>
                     </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -100,8 +104,9 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-4 border-t">
-        <div className="text-sm text-muted-foreground">Gold Store POS v1.0</div>
+      <SidebarFooter className="p-4 border-t border-amber-100 bg-gradient-to-r from-amber-50 to-yellow-50">
+        <div className="text-sm text-amber-600 font-medium">Gold Store POS v1.0</div>
+        <div className="text-xs text-gray-500">Premium Point of Sale</div>
       </SidebarFooter>
     </Sidebar>
   )

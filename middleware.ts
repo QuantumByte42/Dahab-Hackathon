@@ -18,8 +18,8 @@ export default async function middleware(req: NextRequest) {
         console.log("authRefresh:", error)
       }
     }
-    // If authenticated, allow the request to proceed
-    return NextResponse.rewrite(new URL("/login", req.url))
+    // If not authenticated, redirect to home page (which has the login form)
+    return NextResponse.redirect(new URL("/login", req.url))
 }
  
 // Routes Middleware should not run on

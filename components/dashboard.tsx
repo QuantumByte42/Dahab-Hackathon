@@ -38,72 +38,80 @@ export function Dashboard() {
   const { t, isRTL } = useLanguage()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">{t("dashboard")}</h1>
-        <Badge variant="outline" className="text-sm">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
+          {t("dashboard")}
+        </h1>
+        <Badge className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-0 text-sm px-4 py-2">
           {new Date().toLocaleDateString(isRTL ? "ar-JO" : "en-US")}
         </Badge>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("dailySales")}</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-amber-800">{t("dailySales")}</CardTitle>
+            <TrendingUp className="h-5 w-5 text-amber-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-3xl font-bold text-amber-900">
               {mockData.dailySales.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
             </div>
-            <p className="text-xs text-muted-foreground">+12.5% from yesterday</p>
+            <p className="text-xs text-amber-600 font-medium">+12.5% from yesterday</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("totalGoldSold")}</CardTitle>
-            <Weight className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-amber-800">{t("totalGoldSold")}</CardTitle>
+            <Weight className="h-5 w-5 text-amber-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-3xl font-bold text-amber-900">
               {mockData.totalGoldWeight} {isRTL ? "جرام" : "grams"}
             </div>
-            <p className="text-xs text-muted-foreground">+8.2% from yesterday</p>
+            <p className="text-xs text-amber-600 font-medium">+8.2% from yesterday</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Transactions Today</CardTitle>
-            <Coins className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-amber-800">Transactions Today</CardTitle>
+            <Coins className="h-5 w-5 text-amber-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">+3 from yesterday</p>
+            <div className="text-3xl font-bold text-amber-900">24</div>
+            <p className="text-xs text-amber-600 font-medium">+3 from yesterday</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Recent Transactions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("recentTransactions")}</CardTitle>
+      <Card className="border-amber-200 bg-gradient-to-br from-white to-amber-50">
+        <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
+          <CardTitle className="text-xl font-semibold">{t("recentTransactions")}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <div className="space-y-4">
             {mockData.recentTransactions.map((transaction) => (
-              <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div 
+                key={transaction.id} 
+                className="flex items-center justify-between p-4 border border-amber-100 rounded-lg bg-gradient-to-r from-amber-25 to-yellow-25 hover:shadow-md transition-all duration-300 hover:border-amber-300"
+              >
                 <div className="space-y-1">
-                  <p className="font-medium">{transaction.customer_name}</p>
-                  <p className="text-sm text-muted-foreground">{transaction.gold_type}</p>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full"></div>
+                    <p className="font-semibold text-amber-900">{transaction.customer_name}</p>
+                  </div>
+                  <p className="text-sm text-amber-700 ml-4">{transaction.gold_type}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">
+                  <p className="font-bold text-lg text-amber-900">
                     {transaction.total_amount_jod.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-amber-600">
                     {new Date(transaction.created).toLocaleTimeString(isRTL ? "ar-JO" : "en-US")}
                   </p>
                 </div>
