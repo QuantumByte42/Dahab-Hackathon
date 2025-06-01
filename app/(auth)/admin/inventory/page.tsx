@@ -13,7 +13,7 @@ import { useLanguage } from "@/contexts/language-context"
 import { Package, Plus, Search, Edit, Trash2, Building2, Phone, MapPin, User } from "lucide-react"
 import { submitForm } from "@/lib/submit"
 import { get_inventory } from "@/lib/api"
-import { InventoryKaratOptions, InventoryRecord, InventoryTypeOptions } from "@/lib/pocketbase-types"
+import { InventoryItemTypeOptions, InventoryKaratOptions, InventoryRecord } from "@/lib/pocketbase-types"
 
 export default function InventoryPage() {
   const { isRTL } = useLanguage()
@@ -22,26 +22,25 @@ export default function InventoryPage() {
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [newItem, setNewItem] = useState({
     id: "",
-    name: "",
-    type: "",
-    weight_grams: "",
-    karat: "",
-    wholesale_vendor: {
-      name: "",
-      contact: "",
-      phone: "",
-      address: "",
-    },
-    cost_price_jod: "",
-    selling_price_jod: "",
-    quantity: "",
+    item_id: "QB4_0001",
+    item_name: "test",
+    item_type: "Ring",
+    weight: "5.1",
+    karat: "21",
+    cost_price: "150",
+    selling_price: "180",
+    quantity: "2",
+    vendor_name: "test",
+    vendor_phone: "test",
+    vendor_address: "test",
+    vendor_contact_person: "test",
   })
 
   const filteredInventory = inventory.filter(
     (item) =>
       item.item_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.id.toLowerCase().includes(searchTerm.toLowerCase()),
+      item.item_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.item_id.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   useEffect(() => {
@@ -57,7 +56,8 @@ export default function InventoryPage() {
     setNewItem((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleAddItem = async () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     const res = await submitForm(null, "inventory", newItem)
     if (res.record)
       console.log(res.msg)
@@ -67,14 +67,18 @@ export default function InventoryPage() {
     // Reset form
     setNewItem({
       id: "",
-      name: "",
-      type: "",
-      weight_grams: "",
+      item_id: "",
+      item_name: "",
+      item_type: "",
+      weight: "",
       karat: "",
-      wholesale_vendor: { name: "", contact: "", phone: "", address: "" },
-      cost_price_jod: "",
-      selling_price_jod: "",
+      cost_price: "",
+      selling_price: "",
       quantity: "",
+      vendor_name: "",
+      vendor_phone: "",
+      vendor_address: "",
+      vendor_contact_person: "",
     })
   }
 
@@ -83,19 +87,19 @@ export default function InventoryPage() {
     // Reset form
     setNewItem({
       id: "",
-      name: "",
-      type: "",
-      weight_grams: "",
+      item_id: "",
+      item_name: "",
+      item_type: "",
+      weight: "",
       karat: "",
-      wholesale_vendor: { name: "", contact: "", phone: "", address: "" },
-      cost_price_jod: "",
-      selling_price_jod: "",
+      cost_price: "",
+      selling_price: "",
       quantity: "",
+      vendor_name: "",
+      vendor_phone: "",
+      vendor_address: "",
+      vendor_contact_person: "",
     })
-  }
-
-  const handleSubmit = async () => {
-
   }
 
   return (
@@ -127,20 +131,24 @@ export default function InventoryPage() {
                     <Label htmlFor="item_id" className="text-amber-700 font-medium">Item ID</Label>
                     <Input
                       id="item_id"
-                      value={newItem.id}
-                      onChange={(e) => setNewItem({ ...newItem, id: e.target.value })}
+                      name="item_id"
+                      value={newItem.item_id}
+                      onChange={handleInputChange}
                       placeholder="QB4_00000"
                       className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                      required
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="item_name" className="text-amber-700 font-medium">Item Name</Label>
                     <Input
                       id="item_name"
-                      value={newItem.name}
-                      onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                      name="item_name"
+                      value={newItem.item_name}
+                      onChange={handleInputChange}
                       placeholder="Classic Gold Ring"
                       className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                      required
                     />
                   </div>
                 </div>
@@ -148,12 +156,12 @@ export default function InventoryPage() {
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="item_type" className="text-amber-700 font-medium">Item Type</Label>
-                    <Select value={newItem.type} onValueChange={(value) => setNewItem({ ...newItem, type: value })}>
+                    <Select name="type" onValueChange={(value) => setNewItem({ ...newItem, item_type: value })}>
                       <SelectTrigger className="border-amber-200 focus:border-amber-400 focus:ring-amber-400">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        {Object.values(InventoryTypeOptions).map((type) => (
+                        {Object.values(InventoryItemTypeOptions).map((type) => (
                           <SelectItem key={type} value={type}>
                             {type}
                           </SelectItem>
@@ -165,12 +173,14 @@ export default function InventoryPage() {
                     <Label htmlFor="weight" className="text-amber-700 font-medium">Weight (grams)</Label>
                     <Input
                       id="weight"
+                      name="weight"
                       type="number"
                       step="0.01"
-                      value={newItem.weight_grams}
-                      onChange={(e) => setNewItem({ ...newItem, weight_grams: e.target.value })}
+                      value={newItem.weight}
+                      onChange={handleInputChange}
                       placeholder="5.20"
                       className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                      required
                     />
                   </div>
                   <div className="space-y-2">
@@ -197,27 +207,19 @@ export default function InventoryPage() {
                       <Label htmlFor="vendor_name">Vendor Name</Label>
                       <Input
                         id="vendor_name"
-                        value={newItem.wholesale_vendor.name}
-                        onChange={(e) =>
-                          setNewItem({
-                            ...newItem,
-                            wholesale_vendor: { ...newItem.wholesale_vendor, name: e.target.value },
-                          })
-                        }
+                        name="vendor_name"
+                        value={newItem.vendor_name}
+                        onChange={handleInputChange}
                         placeholder="Al-Zahra Gold Trading"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="vendor_contact">Contact Person</Label>
+                      <Label htmlFor="vendor_contact_person">Contact Person</Label>
                       <Input
-                        id="vendor_contact"
-                        value={newItem.wholesale_vendor.contact}
-                        onChange={(e) =>
-                          setNewItem({
-                            ...newItem,
-                            wholesale_vendor: { ...newItem.wholesale_vendor, contact: e.target.value },
-                          })
-                        }
+                        id="vendor_contact_person"
+                        name="vendor_contact_person"
+                        value={newItem.vendor_contact_person}
+                        onChange={handleInputChange}
                         placeholder="Ahmad Al-Zahra"
                       />
                     </div>
@@ -225,13 +227,9 @@ export default function InventoryPage() {
                       <Label htmlFor="vendor_phone">Phone</Label>
                       <Input
                         id="vendor_phone"
-                        value={newItem.wholesale_vendor.phone}
-                        onChange={(e) =>
-                          setNewItem({
-                            ...newItem,
-                            wholesale_vendor: { ...newItem.wholesale_vendor, phone: e.target.value },
-                          })
-                        }
+                        name="vendor_phone"
+                        value={newItem.vendor_phone}
+                        onChange={handleInputChange}
                         placeholder="+962-6-5555555"
                       />
                     </div>
@@ -239,13 +237,9 @@ export default function InventoryPage() {
                       <Label htmlFor="vendor_address">Address</Label>
                       <Input
                         id="vendor_address"
-                        value={newItem.wholesale_vendor.address}
-                        onChange={(e) =>
-                          setNewItem({
-                            ...newItem,
-                            wholesale_vendor: { ...newItem.wholesale_vendor, address: e.target.value },
-                          })
-                        }
+                        name="vendor_address"
+                        value={newItem.vendor_address}
+                        onChange={handleInputChange}
                         placeholder="Downtown Amman, Jordan"
                       />
                     </div>
@@ -260,7 +254,7 @@ export default function InventoryPage() {
                       name="cost_price"
                       type="number"
                       step="0.01"
-                      value={newItem.cost_price_jod}
+                      value={newItem.cost_price}
                       onChange={handleInputChange}
                       placeholder="180.00"
                     />
@@ -272,7 +266,7 @@ export default function InventoryPage() {
                       name="selling_price"
                       type="number"
                       step="0.01"
-                      value={newItem.selling_price_jod}
+                      value={newItem.selling_price}
                       onChange={handleInputChange}
                       placeholder="220.00"
                     />
@@ -298,8 +292,8 @@ export default function InventoryPage() {
                 >
                   Cancel
                 </Button>
-                <Button 
-                  onClick={handleAddItem}
+                <Button
+                  type="submit"
                   className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                 >
                   Add Item
@@ -353,7 +347,7 @@ export default function InventoryPage() {
                 <TableRow key={inventory.id}>
                   <TableCell className="font-mono text-sm">{inventory.item_id}</TableCell>
                   <TableCell className="font-medium">{inventory.item_name}</TableCell>
-                  <TableCell>{inventory.type}</TableCell>
+                  <TableCell>{inventory.item_type}</TableCell>
                   <TableCell>{inventory.weight}g</TableCell>
                   <TableCell>
                     <Badge variant="outline">{inventory.karat}K</Badge>

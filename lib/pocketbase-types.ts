@@ -110,7 +110,7 @@ export type AdminsRecord = {
 	verified?: boolean
 }
 
-export enum InventoryTypeOptions {
+export enum InventoryItemTypeOptions {
 	"Ring" = "Ring",
 	"Bracelet" = "Bracelet",
 	"Necklace" = "Necklace",
@@ -131,35 +131,27 @@ export enum InventoryKaratOptions {
 	"E6" = "6",
 }
 export type InventoryRecord = {
-	cost_price?: number
-	created?: IsoDateString
 	id: string
 	item_id: string
 	item_name: string
+	item_type: InventoryItemTypeOptions
 	karat: InventoryKaratOptions
 	quantity?: number
+	cost_price?: number
 	selling_price?: number
-	type: InventoryTypeOptions
 	updated?: IsoDateString
 	vendor_address?: string
 	vendor_contact_person?: string
 	vendor_name?: string
 	vendor_phone?: string
 	weight: number
+	created?: IsoDateString
 }
 
 export enum InvoicesTypeOptions {
 	"cash" = "cash",
 	"credit" = "credit",
 }
-
-// Customer type for direct customer data (not a collection)
-export type CustomersRecord = {
-	id: string
-	name: string
-	phone?: string
-}
-
 export type InvoicesRecord<Titems = unknown> = {
 	No?: string
 	created?: IsoDateString

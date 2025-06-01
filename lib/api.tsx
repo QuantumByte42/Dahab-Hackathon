@@ -1,15 +1,5 @@
 import { getPocketBase } from "./pocketbase";
-import { CustomersRecord, InventoryRecord, InvoicesRecord, InvoicesResponse, InvoicesTypeOptions } from "./pocketbase-types";
-
-export async function get_customers() {
-    const pb = getPocketBase()
-
-    const records = await pb.collection("customers")
-                            .getList<CustomersRecord>(1, 50);
-    if (records.totalItems > 0)
-        return (records.items)
-    return ([])
-}
+import { InventoryRecord, InvoicesRecord, InvoicesResponse, InvoicesTypeOptions } from "./pocketbase-types";
 
 export async function get_inventory() {
     const pb = getPocketBase()
@@ -195,112 +185,11 @@ interface TransactionData {
     created: string
 }
 
-export async function get_transactions(): Promise<TransactionData[]> {
-    const pb = getPocketBase()
-    
-    try {
-        const invoices = await pb.collection("invoices")
-                                .getList<InvoicesResponse>(1, 100, {
-                                    expand: "customer",
-                                    sort: "-created"
-                                });
-        
-        const transactions: TransactionData[] = []
-        
-        for (const invoice of invoices.items) {
-            const customer = (invoice as { expand?: { customer?: CustomersRecord } }).expand?.customer
-            const items = (invoice.items as unknown as Array<{
-                item_id?: string;
-                item_name?: string;
-                type?: string;
-                weight?: number;
-                karat?: string;
-                selling_price?: number;
-                making_charges?: number;
-                quantity?: number;
-            }>) || []
-            
-            // If invoice has multiple items, create one transaction per item
-            if (items.length > 0) {
-                for (const item of items) {
-                    const sellingPrice = item.selling_price || 0
-                    const makingCharges = item.making_charges || 0
-                    const weight = item.weight || 1
-                    const quantity = item.quantity || 1
-                    
-                    const pricePerGram = weight > 0 ? (sellingPrice + makingCharges) / weight : 0
-                    
-                    transactions.push({
-                        id: `${invoice.id}_${item.item_id || items.indexOf(item)}`,
-                        sale_id: invoice.id,
-                        customer_name: customer?.name || "Unknown Customer",
-                        customer_phone: customer?.phone,
-                        gold_type: item.item_name || item.type || "Gold Item",
-                        karat: parseInt(item.karat?.toString().replace(/[^0-9]/g, '') || '21'),
-                        weight_grams: weight,
-                        price_per_gram_jod: pricePerGram,
-                        total_amount_jod: (sellingPrice + makingCharges) * quantity,
-                        payment_method: invoice.type || "cash",
-                        created: invoice.created || new Date().toISOString()
-                    })
-                }
-            } else {
-                // If no items array, create one transaction for the whole invoice
-                transactions.push({
-                    id: invoice.id,
-                    sale_id: invoice.id,
-                    customer_name: customer?.name || "Unknown Customer",
-                    customer_phone: customer?.phone,
-                    gold_type: "Multiple Items",
-                    karat: 21, // Default
-                    weight_grams: 0,
-                    price_per_gram_jod: 0,
-                    total_amount_jod: invoice.total_amount || 0,
-                    payment_method: invoice.type || "cash",
-                    created: invoice.created || new Date().toISOString()
-                })
-            }
-        }
-        
-        return transactions
-    } catch (error) {
-        console.error("Error fetching transactions:", error)
-        return []
-    }
-}
-
-export async function get_vendors() {
+export async function get_admins() {
     const pb = getPocketBase()
 
     try {
-        const records = await pb.collection("vendors")
-                                .getList(1, 50);
-        if (records.totalItems > 0)
-            return (records.items)
-        return ([])
-    } catch (error) {
-        console.error("Error fetching vendors:", error)
-        return ([])
-    }
-}
-
-export async function create_vendor(vendorData: { name: string }) {
-    const pb = getPocketBase()
-    
-    try {
-        const record = await pb.collection("vendors").create(vendorData)
-        return record
-    } catch (error) {
-        console.error("Error creating vendor:", error)
-        return null
-    }
-}
-
-export async function get_employees() {
-    const pb = getPocketBase()
-
-    try {
-        const records = await pb.collection("employees")
+        const records = await pb.collection("admins")
                                 .getList(1, 50);
         if (records.totalItems > 0)
             return (records.items)
@@ -311,36 +200,14 @@ export async function get_employees() {
     }
 }
 
-export async function create_employee(employeeData: Record<string, unknown>) {
+export async function create_admin(adminData: Record<string, unknown>) {
     const pb = getPocketBase()
     
     try {
-        const record = await pb.collection("employees").create(employeeData)
+        const record = await pb.collection("admins").create(adminData)
         return record
     } catch (error) {
-        console.error("Error creating employee:", error)
-        return null
-    }
-}
-
-export async function create_customer(customerData: { name: string; phone?: string }) {
-    // Since there's no separate customers collection, we'll just return the customer data
-    // The customer info is stored directly in the invoice as customer_name and customer_phone
-    return {
-        id: `customer_${Date.now()}`, // Generate a temporary ID
-        name: customerData.name,
-        phone: customerData.phone || ""
-    }
-}
-
-export async function create_inventory_item(inventoryData: Record<string, unknown>) {
-    const pb = getPocketBase()
-    
-    try {
-        const record = await pb.collection("inventory").create(inventoryData)
-        return record
-    } catch (error) {
-        console.error("Error creating inventory item:", error)
+        console.error("Error creating admin:", error)
         return null
     }
 }

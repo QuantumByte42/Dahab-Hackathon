@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/contexts/language-context"
 import { ShoppingCart, Plus, Trash2, Calculator, ArrowLeft } from "lucide-react"
-import { InventoryTypeOptions, InventoryKaratOptions, InvoicesRecord } from "@/lib/pocketbase-types"
+import { InventoryItemTypeOptions, InventoryKaratOptions, InvoicesRecord } from "@/lib/pocketbase-types"
 import { get_item, create_invoice, update_inventory_quantity, validate_inventory_availability } from "@/lib/api"
 import InvoicePrint from "@/components/invoice-print"
 
@@ -58,7 +58,7 @@ export default function SalesPage() {
       setCurrentItem({
         item_id: item.item_id || "",
         item_name: item.item_name || "",
-        type: item.type || "",
+        type: item.item_type || "",
         weight: item.weight ? item.weight.toString() : "",
         karat: item.karat ? item.karat.toString().replace('E', '') : "",
         selling_price: item.selling_price ? item.selling_price.toString() : "",
@@ -331,7 +331,7 @@ export default function SalesPage() {
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.values(InventoryTypeOptions).map((type) => (
+                    {Object.values(InventoryItemTypeOptions).map((type) => (
                       <SelectItem key={type} value={type}>
                         {type}
                       </SelectItem>
