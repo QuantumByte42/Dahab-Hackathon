@@ -61,9 +61,9 @@ export default function RootLayout({
                   <LogoutButton />
                 </div>
               </header>
-              <main className="flex-1 overflow-hidden bg-gray-50/30 p-6">
+                <main className="flex-1 overflow-hidden bg-gray-50/30 p-6">
                 {children}
-              </main>
+                </main>
             </SidebarInset>
           </SidebarProvider>
         </LanguageProvider>
