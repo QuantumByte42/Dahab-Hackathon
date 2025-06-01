@@ -10,10 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLanguage } from "@/contexts/language-context"
-import { Package, Plus, Search, Edit, Trash2, Building2 } from "lucide-react"
-import { InventoryRecord, InventoryTypeOptions, InventoryKaratOptions } from "@/lib/pocketbase-types"
+import { Package, Plus, Search, Edit, Trash2, Building2, Phone, MapPin, User } from "lucide-react"
 import { submitForm } from "@/lib/submit"
 import { get_inventory } from "@/lib/api"
+import { InventoryKaratOptions, InventoryRecord, InventoryTypeOptions } from "@/lib/pocketbase-types"
 
 export default function InventoryPage() {
   const { t, isRTL } = useLanguage()
@@ -37,6 +37,14 @@ export default function InventoryPage() {
     quantity: "",
   })
 
+  const [selectVendor, setSelectVendor] = useState({
+    vendor_name: "",
+    vendor_phone: "",
+    vendor_address: "",
+    vendor_contact_person: ""
+  })
+  const [showVendorDialog, setShowVendorDialog] = useState(false)
+
   const filteredInventory = inventory.filter(
     (item) =>
       item.item_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -45,11 +53,11 @@ export default function InventoryPage() {
   )
 
   useEffect(() => {
-      const fetch = async () => {
+    const fetch = async () => {
       const inventory = await get_inventory()
-        setInventory(inventory);
-      }
-      fetch()
+      setInventory(inventory);
+    }
+    fetch()
   }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -60,7 +68,7 @@ export default function InventoryPage() {
   const handleAddItem = async () => {
     const res = await submitForm(null, "inventory", newItem)
     if (res.record)
-        console.log(res.msg)
+      console.log(res.msg)
     else
       console.error(res.msg)
     setShowAddDialog(false)
@@ -331,29 +339,58 @@ export default function InventoryPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredInventory.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-mono text-sm">{item.item_id}</TableCell>
-                  <TableCell className="font-medium">{item.item_name}</TableCell>
-                  <TableCell>{item.type}</TableCell>
-                  <TableCell>{item.weight}g</TableCell>
+              {filteredInventory.map((inventory) => (
+                <TableRow key={inventory.id}>
+                  <TableCell className="font-mono text-sm">{inventory.item_id}</TableCell>
+                  <TableCell className="font-medium">{inventory.item_name}</TableCell>
+                  <TableCell>{inventory.type}</TableCell>
+                  <TableCell>{inventory.weight}g</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{item.karat}K</Badge>
+                    <Badge variant="outline">{inventory.karat}K</Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Building2 className="h-3 w-3" />
-                      <span className="text-sm">{item.expand?.vendor?.name}</span>
-                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div className="flex items-center gap-1">
+                          <Building2 className="h-3 w-3" />
+                          <span className="text-sm">{inventory.vendor_name}</span>
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Vendor Information</DialogTitle>
+                        </DialogHeader>
+                        <div className="flex flex-col items-start justify-center space-y-2 p-2">
+                          <div className="flex items-center gap-2 text-lg font-medium">
+                          <Building2 className="h-5 w-5" />
+                          {inventory.vendor_name}
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4" />
+                            {inventory.vendor_phone}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            {inventory.vendor_address}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            {inventory.vendor_contact_person}
+                          </div>
+                          </div>
+                        </div>
+                      </DialogContent>
+                  </Dialog>
                   </TableCell>
                   <TableCell>
-                    {item.cost_price?.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
+                    {inventory.cost_price?.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
                   </TableCell>
                   <TableCell>
-                    {item.selling_price?.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
+                    {inventory.selling_price?.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={item.quantity && item.quantity < 5 ? "destructive" : "default"}>{item.quantity}</Badge>
+                    <Badge variant={inventory.quantity && inventory.quantity < 5 ? "destructive" : "default"}>{inventory.quantity}</Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">

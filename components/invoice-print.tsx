@@ -6,39 +6,17 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Download, Printer, AlertCircle } from 'lucide-react'
 import { generatePDFWithFallback } from '@/utils/pdf-fallback'
-
-interface InvoiceItem {
-  item_id: string
-  item_name: string
-  type: string
-  weight: number
-  karat: string
-  selling_price: number
-  making_charges: number
-  quantity: number
-}
-
-interface InvoiceData {
-  invoiceNumber: string
-  date: string
-  customerName: string
-  customerPhone?: string
-  items: InvoiceItem[]
-  subtotal: number
-  makingCharges: number
-  totalAmount: number
-  paymentMethod: string
-}
+import { InvoicesRecord } from '@/lib/pocketbase-types'
 
 interface InvoicePrintProps {
-  invoiceData: InvoiceData
+  invoice: InvoicesRecord
   onPrint?: () => void
   onDownloadPDF?: () => void
 }
 
 // Printable Invoice Component
-const PrintableInvoice = forwardRef<HTMLDivElement, { invoiceData: InvoiceData }>(
-  ({ invoiceData }, ref) => {
+const PrintableInvoice = forwardRef<HTMLDivElement, { invoice: InvoicesRecord }>(
+  ({ invoice: invoiceData }, ref) => {
     return (
       <div ref={ref} className="bg-white p-8 max-w-4xl mx-auto" style={{ fontFamily: 'Arial, sans-serif' }}>
         {/* Header */}
@@ -48,16 +26,16 @@ const PrintableInvoice = forwardRef<HTMLDivElement, { invoiceData: InvoiceData }
               <h1 className="text-3xl font-bold text-gray-800 mb-2">DAHAB GOLD STORE</h1>
               <p className="text-gray-600">Premium Gold Jewelry & Accessories</p>
               <p className="text-sm text-gray-500 mt-1">
-                📍 Amman, Jordan | 📞 +962-XX-XXXXXXX | 📧 info@dahabgold.com
+                📍 Amman, Jordan | 📞 +962781157799 | 📧 dahab@qb4.tech
               </p>
             </div>
             <div className="text-right">
               <h2 className="text-2xl font-bold text-gray-800 mb-2">INVOICE</h2>
               <p className="text-sm text-gray-600">
-                <strong>Invoice #:</strong> {invoiceData.invoiceNumber}
+                <strong>Invoice #:</strong> {invoiceData.No}
               </p>
               <p className="text-sm text-gray-600">
-                <strong>Date:</strong> {new Date(invoiceData.date).toLocaleDateString()}
+                <strong>Date:</strong> {new Date(invoiceData.created || new Date()).toLocaleDateString()}
               </p>
             </div>
           </div>
@@ -67,11 +45,11 @@ const PrintableInvoice = forwardRef<HTMLDivElement, { invoiceData: InvoiceData }
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-3">Bill To:</h3>
           <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="font-medium text-gray-800">{invoiceData.customerName}</p>
-            {invoiceData.customerPhone && (
-              <p className="text-gray-600">Phone: {invoiceData.customerPhone}</p>
+            <p className="font-medium text-gray-800">{invoiceData.customer_name}</p>
+            {invoiceData.customer_name && (
+              <p className="text-gray-600">Phone: {invoiceData.customer_phone}</p>
             )}
-            <p className="text-sm text-gray-500 mt-1">Payment Method: {invoiceData.paymentMethod}</p>
+            <p className="text-sm text-gray-500 mt-1">Payment Method: {invoiceData.type}</p>
           </div>
         </div>
 
@@ -92,7 +70,7 @@ const PrintableInvoice = forwardRef<HTMLDivElement, { invoiceData: InvoiceData }
               </tr>
             </thead>
             <tbody>
-              {invoiceData.items.map((item, index) => (
+              {invoiceData.items?.map((item, index) => (
                 <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="border border-gray-300 px-3 py-2 text-sm font-mono">{item.item_id}</td>
                   <td className="border border-gray-300 px-3 py-2 text-sm">{item.item_name}</td>
@@ -117,16 +95,16 @@ const PrintableInvoice = forwardRef<HTMLDivElement, { invoiceData: InvoiceData }
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="flex justify-between py-1">
                 <span className="text-gray-600">Subtotal:</span>
-                <span className="font-medium">{invoiceData.subtotal.toFixed(2)} JOD</span>
+                <span className="font-medium">{invoiceData.subtotal?.toFixed(2)} JOD</span>
               </div>
               <div className="flex justify-between py-1">
                 <span className="text-gray-600">Making Charges:</span>
-                <span className="font-medium">{invoiceData.makingCharges.toFixed(2)} JOD</span>
+                <span className="font-medium">{invoiceData.making_charges?.toFixed(2)} JOD</span>
               </div>
               <div className="border-t border-gray-300 mt-2 pt-2">
                 <div className="flex justify-between">
                   <span className="text-lg font-bold text-gray-800">Total Amount:</span>
-                  <span className="text-lg font-bold text-gray-800">{invoiceData.totalAmount.toFixed(2)} JOD</span>
+                  <span className="text-lg font-bold text-gray-800">{invoiceData.total_amount?.toFixed(2)} JOD</span>
                 </div>
               </div>
             </div>
@@ -137,7 +115,7 @@ const PrintableInvoice = forwardRef<HTMLDivElement, { invoiceData: InvoiceData }
         <div className="border-t border-gray-300 pt-4 mt-8">
           <div className="text-center text-sm text-gray-500">
             <p className="mb-2">Thank you for shopping with Dahab Gold Store!</p>
-            <p>For questions about this invoice, please contact us at info@dahabgold.com</p>
+            <p>For questions about this invoice, please contact us at dahab@qb4.tech</p>
             <p className="mt-4 font-medium">All items are guaranteed for authenticity and quality.</p>
           </div>
         </div>
@@ -158,7 +136,7 @@ const PrintableInvoice = forwardRef<HTMLDivElement, { invoiceData: InvoiceData }
 PrintableInvoice.displayName = 'PrintableInvoice'
 
 // Main Invoice Print Component
-export function InvoicePrint({ invoiceData, onPrint, onDownloadPDF }: InvoicePrintProps) {
+export function InvoicePrint({ invoice, onPrint, onDownloadPDF }: InvoicePrintProps) {
   const invoiceRef = useRef<HTMLDivElement>(null)
 
   const handlePrint = () => {
@@ -169,7 +147,7 @@ export function InvoicePrint({ invoiceData, onPrint, onDownloadPDF }: InvoicePri
           <!DOCTYPE html>
           <html>
             <head>
-              <title>Invoice ${invoiceData.invoiceNumber}</title>
+              <title>${invoice.No}</title>
               <meta charset="utf-8">
               <style>
                 body { 
@@ -181,6 +159,12 @@ export function InvoicePrint({ invoiceData, onPrint, onDownloadPDF }: InvoicePri
                 @media print { 
                   body { margin: 0; padding: 0; } 
                   .no-print { display: none !important; }
+                  @page {
+                    margin: 0;
+                  }
+                  body {
+                    margin: 1cm;
+                  }
                 }
                 table { border-collapse: collapse; }
                 .border { border: 1px solid #d1d5db; }
@@ -250,7 +234,7 @@ export function InvoicePrint({ invoiceData, onPrint, onDownloadPDF }: InvoicePri
 
     const success = await generatePDFWithFallback(
       invoiceRef.current, 
-      `dahab-invoice-${invoiceData.invoiceNumber}`
+      `dahab-invoice-${invoice.No}`
     )
 
     if (success) {
@@ -277,7 +261,7 @@ export function InvoicePrint({ invoiceData, onPrint, onDownloadPDF }: InvoicePri
       </div>
 
       {/* Printable Invoice */}
-      <PrintableInvoice ref={invoiceRef} invoiceData={invoiceData} />
+      <PrintableInvoice ref={invoiceRef} invoice={invoice} />
     </div>
   )
 }

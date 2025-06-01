@@ -10,16 +10,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/contexts/language-context"
 import { ShoppingCart, Plus, Trash2, Printer, Calculator, ArrowLeft } from "lucide-react"
-import { InventoryTypeOptions, InventoryKaratOptions, InvoicesTypeOptions, InvoicesRecord, CustomersRecord } from "@/lib/pocketbase-types"
-import { get_item, create_customer, create_invoice, update_inventory_quantity, validate_inventory_availability } from "@/lib/api"
+import { InventoryTypeOptions, InventoryKaratOptions, InvoicesRecord, InventoryRecord } from "@/lib/pocketbase-types"
+import { get_item, create_invoice, update_inventory_quantity, validate_inventory_availability } from "@/lib/api"
 import InvoicePrint from "@/components/invoice-print"
+import { getPocketBase } from "@/lib/pocketbase"
 
 export default function SalesPage() {
   const { isRTL } = useLanguage()
-  const [customerName, setCustomerName] = useState("")
-  const [customerPhone, setCustomerPhone] = useState("")
+  const [customer, setCustomer] = useState({
+    name: "",
+    phone: ""
+  })
   const [transactionType, setTransactionType] = useState("")
-  const [currentItemID, setCurrentItemID] = useState("")
   const [saleItems, setSaleItems] = useState<Array<{
     item_id: string;
     item_name: string;
@@ -30,8 +32,9 @@ export default function SalesPage() {
     making_charges: number;
     quantity: number;
   }>>([]);
+  
+  const [isCurretItem, setIsCurrentItem] = useState(false)
   const [currentItem, setCurrentItem] = useState({
-    id: "",
     item_id: "",
     item_name: "",
     type: "",
@@ -40,41 +43,33 @@ export default function SalesPage() {
     selling_price: "",
     quantity: "1",
   })
+  const [outOfStock, setOutOfStock] = useState(false)
+  
+  const [loading, setLoading] = useState(false)
   const [showInvoice, setShowInvoice] = useState(false)
-  const [completedInvoice, setCompletedInvoice] = useState<{
-    invoice: InvoicesRecord,
-    customer: CustomersRecord,
-    items: Array<{
-      item_id: string;
-      item_name: string;
-      type: string;
-      weight: number;
-      karat: string;
-      selling_price: number;
-      making_charges: number;
-      quantity: number;
-    }>
-  } | null>(null)
+  const [completedInvoice, setCompletedInvoice] = useState< InvoicesRecord | null>(null)
 
   useEffect(() => {
     const fetch = async () => {
-      const item = await get_item(currentItemID);
+      setIsCurrentItem(false)
+      const item = await get_item(currentItem.item_id);
       if(!item)
-        return ;
+        return ;  
+      setIsCurrentItem(true)
       setCurrentItem({
-        id: item.id,
         item_id: item.item_id || "",
         item_name: item.item_name || "",
         type: item.type || "",
         weight: item.weight ? item.weight.toString() : "",
         karat: item.karat ? item.karat.toString().replace('E', '') : "",
         selling_price: item.selling_price ? item.selling_price.toString() : "",
-        quantity: "1",
+        quantity: item.quantity > 0 ? "1" : "0",
       })
+      setOutOfStock(item.quantity <= 0)
     }
     fetch()
-    console.log(`currentItemId: ${currentItemID}`)
-  }, [currentItemID])
+    console.log(`currentItemId: ${currentItem.item_id}`)
+  }, [currentItem.item_id])
 
   // Auto-calculate making charges (typically 10-15% of selling price)
   const calculateMakingCharges = (sellingPrice: number) => {
@@ -104,7 +99,6 @@ export default function SalesPage() {
 
     // Reset current item form
     setCurrentItem({
-      id: "",
       item_id: "",
       item_name: "",
       type: "",
@@ -113,6 +107,7 @@ export default function SalesPage() {
       selling_price: "",
       quantity: "1",
     })
+    setIsCurrentItem(false)
   }
 
   const removeItemFromSale = (index: number) => {
@@ -131,7 +126,7 @@ export default function SalesPage() {
 
   const handleCompleteSale = async () => {
     if (saleItems.length === 0) return
-
+    setLoading(true)
     try {
       // 1. Validate inventory availability
       const inventoryValidation = await validate_inventory_availability(
@@ -141,28 +136,16 @@ export default function SalesPage() {
       const invalidItems = inventoryValidation.filter(v => !v.valid)
       if (invalidItems.length > 0) {
         alert(`Inventory validation failed:\n${invalidItems.map(item => item.message).join('\n')}`)
+        setLoading(false)
         return
       }
 
-      // 2. Create or get customer
-      const customer = await create_customer({
-        name: customerName,
-        phone: customerPhone || undefined,
-        purchase_count: 1,
-        total_purchases: totalAmount
-      })
-
-      if (!customer) {
-        alert("Failed to create customer record")
-        return
-      }
-
-      // 3. Create invoice
+      // 2. Create invoice
       const invoiceNumber = `INV-${Date.now()}`
       const invoiceData = {
-        invoice_number: invoiceNumber,
-        date: new Date().toISOString(),
-        customer: customer.id,
+        No: invoiceNumber,
+        customer_name: customer.name,
+        customer_phone: customer.phone, 
         items: saleItems,
         subtotal,
         tax: 0, // No tax calculation for now
@@ -177,10 +160,11 @@ export default function SalesPage() {
       
       if (!invoice) {
         alert("Failed to create invoice")
+        setLoading(false)
         return
       }
 
-      // 4. Update inventory quantities
+      // 3. Update inventory quantities
       for (const item of saleItems) {
         try {
           await update_inventory_quantity(item.item_id, item.quantity)
@@ -190,23 +174,17 @@ export default function SalesPage() {
         }
       }
 
-      // 5. Store completed invoice data for PDF generation
-      setCompletedInvoice({
-        invoice,
-        customer,
-        items: [...saleItems] // Make a copy of current sale items
-      })
+      // 4. Store completed invoice data for PDF generation
+      setCompletedInvoice(invoice)
 
       // Show invoice print view
       setShowInvoice(true)
 
       // 6. Clear the form
       setSaleItems([])
-      setCustomerName("")
-      setCustomerPhone("")
+      setCustomer({name: "", phone: ""})
       setTransactionType("")
       setCurrentItem({
-        id: "",
         item_id: "",
         item_name: "",
         type: "",
@@ -220,6 +198,7 @@ export default function SalesPage() {
       console.error("Error completing sale:", error)
       alert("Failed to complete sale. Please try again.")
     }
+    setLoading(false)
   }
 
   const printInvoice = () => {
@@ -233,29 +212,21 @@ export default function SalesPage() {
     setCompletedInvoice(null)
   }
 
+  // TODO remove this testing
+  // useEffect(() => {
+  //   const fetch = async () => {
+  //     try {
+  //       const pb = getPocketBase()
+  //       const invoice = await pb.collection("invoices").getOne<InvoicesRecord>("t5d1oet37646k7z")
+  //       setCompletedInvoice(invoice);
+  //       setShowInvoice(true)
+  //     } catch {}
+  //   }
+  //   fetch()
+  // }, [])
+
   // If showing invoice, render the invoice print component
   if (showInvoice && completedInvoice) {
-    const invoiceData = {
-      invoiceNumber: completedInvoice.invoice.No || completedInvoice.invoice.id,
-      date: completedInvoice.invoice.created || new Date().toISOString(),
-      customerName: completedInvoice.customer.name,
-      customerPhone: completedInvoice.customer.phone || '',
-      items: completedInvoice.items.map(item => ({
-        item_id: item.item_id,
-        item_name: item.item_name,
-        type: item.type,
-        weight: item.weight,
-        karat: item.karat,
-        selling_price: item.selling_price,
-        making_charges: item.making_charges,
-        quantity: item.quantity
-      })),
-      subtotal: completedInvoice.invoice.subtotal || 0,
-      makingCharges: completedInvoice.invoice.making_charges || 0,
-      totalAmount: completedInvoice.invoice.total_amount || 0,
-      paymentMethod: completedInvoice.invoice.type === 'cash' ? 'Cash' : 'Credit'
-    }
-
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-2">
@@ -265,17 +236,8 @@ export default function SalesPage() {
           </Button>
           <h1 className="text-3xl font-bold">Invoice Generated</h1>
         </div>
-        
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-green-800 font-medium">
-            ✅ Sale completed successfully! Invoice #{invoiceData.invoiceNumber}
-          </p>
-          <p className="text-green-600 text-sm mt-1">
-            You can now print or download the invoice as PDF.
-          </p>
-        </div>
 
-        <InvoicePrint invoiceData={invoiceData} />
+        <InvoicePrint invoice={completedInvoice} />
       </div>
     )
   }
@@ -301,8 +263,8 @@ export default function SalesPage() {
               <Label htmlFor="customer_name">Customer Name</Label>
               <Input
                 id="customer_name"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
+                value={customer.name}
+                onChange={(e) => setCustomer(prev  => ({...prev, name: e.target.value}))}
                 placeholder="Enter customer name"
               />
             </div>
@@ -310,8 +272,8 @@ export default function SalesPage() {
               <Label htmlFor="customer_phone">Phone (Optional)</Label>
               <Input
                 id="customer_phone"
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
+                value={customer.phone}
+                onChange={(e) => setCustomer(prev  => ({...prev, phone: e.target.value}))}
                 placeholder="+962-XX-XXXXXXX"
               />
             </div>
@@ -340,9 +302,9 @@ export default function SalesPage() {
               <Label htmlFor="item_id">Item ID</Label>
               <Input
                 id="item_id"
-                value={currentItemID}
-                onChange={(e) => setCurrentItemID(e.target.value)}
-                placeholder="ITM001"
+                value={currentItem.item_id}
+                onChange={(e) => setCurrentItem(prev => ({...prev, item_id: e.target.value}))}
+                placeholder="QB4_00000"
               />
             </div>
             <div className="space-y-2">
@@ -350,6 +312,7 @@ export default function SalesPage() {
               <Input
                 id="item_name"
                 value={currentItem.item_name}
+                disabled={true}
                 onChange={(e) => setCurrentItem({ ...currentItem, item_name: e.target.value })}
                 placeholder="Classic Gold Ring"
               />
@@ -358,6 +321,7 @@ export default function SalesPage() {
               <div className="space-y-2">
                 <Label htmlFor="item_type">Type</Label>
                 <Select
+                  disabled={true}
                   value={currentItem.type}
                   onValueChange={(value) => setCurrentItem({ ...currentItem, type: value })}
                 >
@@ -377,6 +341,7 @@ export default function SalesPage() {
                 <Label htmlFor="karat">Karat</Label>
                 <Select
                   value={currentItem.karat}
+                  disabled={true}
                   onValueChange={(value) => setCurrentItem({ ...currentItem, karat: value })}
                 >
                   <SelectTrigger>
@@ -399,6 +364,7 @@ export default function SalesPage() {
                   id="weight"
                   type="number"
                   step="0.01"
+                  disabled={!isCurretItem || outOfStock}
                   value={currentItem.weight}
                   onChange={(e) => setCurrentItem({ ...currentItem, weight: e.target.value })}
                   placeholder="5.20"
@@ -409,6 +375,7 @@ export default function SalesPage() {
                 <Input
                   id="quantity"
                   type="number"
+                  disabled={!isCurretItem || outOfStock}
                   value={currentItem.quantity}
                   onChange={(e) => setCurrentItem({ ...currentItem, quantity: e.target.value })}
                   placeholder="1"
@@ -421,6 +388,7 @@ export default function SalesPage() {
                 id="selling_price"
                 type="number"
                 step="0.01"
+                disabled={!isCurretItem || outOfStock}
                 value={currentItem.selling_price}
                 onChange={(e) => setCurrentItem({ ...currentItem, selling_price: e.target.value })}
                 placeholder="220.00"
@@ -436,9 +404,18 @@ export default function SalesPage() {
                 </div>
               </div>
             )}
-            <Button onClick={addItemToSale} className="w-full gap-2">
-              <Plus className="h-4 w-4" />
-              Add Item
+            <Button 
+                onClick={addItemToSale} 
+                className="w-full gap-2"
+                disabled={!isCurretItem || outOfStock}>
+                {outOfStock ? (
+                  <>Out of stock</>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4" />
+                    Add Item
+                  </>
+                )}
             </Button>
           </CardContent>
         </Card>
@@ -473,12 +450,12 @@ export default function SalesPage() {
               <Button
                 onClick={handleCompleteSale}
                 className="w-full gap-2"
-                disabled={saleItems.length === 0 || !customerName || !transactionType}
+                disabled={saleItems.length === 0 || !customer.name || !transactionType}
               >
                 <Calculator className="h-4 w-4" />
                 Complete Sale
               </Button>
-              <Button
+              {/* <Button
                 onClick={printInvoice}
                 variant="outline"
                 className="w-full gap-2"
@@ -486,7 +463,7 @@ export default function SalesPage() {
               >
                 <Printer className="h-4 w-4" />
                 Print Invoice
-              </Button>
+              </Button> */}
             </div>
           </CardContent>
         </Card>

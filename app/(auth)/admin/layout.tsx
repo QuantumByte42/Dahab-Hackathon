@@ -44,7 +44,9 @@ export default function RootLayout({
                   <span className="font-semibold">Gold Store POS</span>
                 </div>
               </header>
-              {children}
+                <div className="m-px p-6">
+                  {children}
+                </div>
             </SidebarInset>
           </SidebarProvider>
         </LanguageProvider>
