@@ -19,44 +19,43 @@ export default function InvoicesPage() {
   const [dateFilter, setDateFilter] = useState("")
   const [paymentFilter, setPaymentFilter] = useState("")
   const [invoices, setInvoices] = useState<InvoicesRecord[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
+  // const [filter, setFilter] = useState("")
 
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        setLoading(true)
-        const data = await get_invoices()
+        // setLoading(true)
+        let filter = ""
+        if (searchTerm !== "")
+          filter += (filter === ""? "" : " && ") 
+            + `(customer_name ~ '${searchTerm}' || No ~ '${searchTerm}') `
+        if (dateFilter !== "")
+          filter += (filter === ""? "" : " && ") 
+            + `(created >= '${dateFilter} 00:00:00' && created <= '${dateFilter} 23:59:59')`
+        if (paymentFilter !== "")
+          filter += (filter === ""? "" : " && ") 
+            + `type = '${paymentFilter}'`
+        const data = await get_invoices(filter) 
         setInvoices(data)
+        // setFilter(filter)
       } catch (error) {
         console.error('Error fetching invoices:', error)
       } finally {
-        setLoading(false)
+        // setLoading(false)
       }
     }
 
     fetchInvoices()
-  }, [])
+  }, [searchTerm, dateFilter, paymentFilter])
 
-  const filteredInvoices = invoices.filter((invoice) => {
-    const expandedInvoice = invoice as { expand?: { customer?: { name?: string } } }
-    const matchesSearch =
-      expandedInvoice.expand?.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.id.toLowerCase().includes(searchTerm.toLowerCase())
 
-    const matchesPayment = !paymentFilter || paymentFilter === "all" || invoice.type === paymentFilter
-
-    // Simple date filter - in real app, you'd want more sophisticated date filtering
-    const matchesDate = !dateFilter || new Date(invoice.created || "").toDateString().includes(dateFilter)
-
-    return matchesSearch && matchesPayment && matchesDate
-  })
-
-  const totalAmount = filteredInvoices.reduce((sum: number, invoice: InvoicesRecord) => sum + (invoice.total_amount || 0), 0)
+  const totalAmount = invoices.reduce((sum: number, invoice: InvoicesRecord) => sum + (invoice.total_amount || 0), 0)
 
   const exportTransactions = () => {
-    // Here you would implement CSV/PDF export
-    console.log("Exporting transactions:", filteredInvoices)
+
+    // TODO: Here you would implement CSV/PDF export
+    console.log("Exporting transactions:", invoices)
   }
 
   const getPaymentMethodBadge = (method: string) => {
@@ -85,8 +84,8 @@ export default function InvoicesPage() {
                 {t("invoices")}
               </h1>
             </div>
-            <Button 
-              onClick={exportTransactions} 
+            <Button
+              onClick={exportTransactions}
               className="gap-2 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
             >
               <Download className="h-4 w-4" />
@@ -101,7 +100,7 @@ export default function InvoicesPage() {
                 <CardTitle className="text-sm font-medium">Total Invoices</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{filteredInvoices.length}</div>
+                <div className="text-2xl font-bold">{invoices.length}</div>
               </CardContent>
             </Card>
             <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
@@ -120,123 +119,130 @@ export default function InvoicesPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-amber-900">
-                  {filteredInvoices.length > 0 ? (totalAmount / filteredInvoices.length).toFixed(2) : '0.00'} {isRTL ? "د.أ" : "JOD"}
+                  {invoices.length > 0 ? (totalAmount / invoices.length).toFixed(2) : '0.00'} {isRTL ? "د.أ" : "JOD"}
                 </div>
               </CardContent>
             </Card>
           </div>
 
-      {/* Filters */}
-      <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
-          <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-            <Filter className="h-4 w-4" />
-            Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="space-y-2">
-              <Label className="text-amber-700 font-medium">Search</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-600" />
-                <Input
-                  placeholder="Search invoices..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-amber-200 focus:ring-amber-400 focus:border-amber-400 bg-white/70"
-                />
+          {/* Filters */}
+          <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
+              <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                <Filter className="h-4 w-4" />
+                Filters
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              {/* <p>{filter}</p> */}
+              <div className="grid gap-4 md:grid-cols-4">
+                <div className="space-y-2">
+                  <Label className="text-amber-700 font-medium">Search</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-600" />
+                    <Input
+                      placeholder="Search invoices..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 border-amber-200 focus:ring-amber-400 focus:border-amber-400 bg-white/70"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-amber-700 font-medium">Date</Label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-600" />
+                    <Input
+                      type="date"
+                      value={dateFilter}
+                      onChange={(e) => setDateFilter(e.target.value)}
+                      className="pl-10 border-amber-200 focus:ring-amber-400 focus:border-amber-400 bg-white/70"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-amber-700 font-medium">Payment Method</Label>
+                  <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+                    <SelectTrigger className="border-amber-200 focus:ring-amber-400 focus:border-amber-400 bg-white/70">
+                      <SelectValue placeholder="All methods" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All methods</SelectItem>
+                      <SelectItem value="cash">{t("cash")}</SelectItem>
+                      <SelectItem value="card">{t("card")}</SelectItem>
+                      <SelectItem value="deferred">{t("deferred")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>&nbsp;</Label>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSearchTerm("")
+                      setDateFilter("")
+                      setPaymentFilter("")
+                    }}
+                    className="w-full border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-amber-700 font-medium">Date</Label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-600" />
-                <Input
-                  type="date"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                  className="pl-10 border-amber-200 focus:ring-amber-400 focus:border-amber-400 bg-white/70"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-amber-700 font-medium">Payment Method</Label>
-              <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-                <SelectTrigger className="border-amber-200 focus:ring-amber-400 focus:border-amber-400 bg-white/70">
-                  <SelectValue placeholder="All methods" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All methods</SelectItem>
-                  <SelectItem value="cash">{t("cash")}</SelectItem>
-                  <SelectItem value="card">{t("card")}</SelectItem>
-                  <SelectItem value="deferred">{t("deferred")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>&nbsp;</Label>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearchTerm("")
-                  setDateFilter("")
-                  setPaymentFilter("")
-                }}
-                className="w-full border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400"
-              >
-                Clear Filters
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>          {/* Invoices Table */}
+            </CardContent>
+          </Card>
+          {/* Invoices Table */}
           <Card className="border-amber-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-100 rounded-t-lg">
-              <CardTitle className="text-amber-800 font-semibold">Invoice History ({filteredInvoices.length})</CardTitle>
+              <CardTitle className="text-amber-800 font-semibold">Invoice History ({invoices.length})</CardTitle>
             </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700">
-                <TableHead className="text-white font-semibold">Invoice ID</TableHead>
-                <TableHead className="text-white font-semibold">Customer</TableHead>
-                <TableHead className="text-white font-semibold">Payment Type</TableHead>
-                <TableHead className="text-white font-semibold">Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredInvoices.map((invoice: InvoicesRecord) => {
-                const expandedInvoice = invoice as { expand?: { customer?: { name?: string } } }
-                return (
-                <TableRow key={invoice.id}>
-                  <TableCell className="font-mono text-sm">{invoice.id}</TableCell>
-                  <TableCell className="font-medium">{expandedInvoice.expand?.customer?.name || 'N/A'}</TableCell>
-                  <TableCell>
-                    <Badge variant={getPaymentMethodBadge(invoice.type || 'cash')}>
-                      {t(invoice.type || 'cash')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <p className="text-sm">
-                        {new Date(invoice.created || "").toLocaleDateString(isRTL ? "ar-JO" : "en-US")}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(invoice.created || "").toLocaleTimeString(isRTL ? "ar-JO" : "en-US")}
-                      </p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700">
+                    <TableHead className="text-white font-semibold">Invoice ID</TableHead>
+                    <TableHead className="text-white font-semibold">Customer</TableHead>
+                    <TableHead className="text-white font-semibold">Payment Type</TableHead>
+                    <TableHead className="text-white font-semibold">Subtotal</TableHead>
+                    <TableHead className="text-white font-semibold">Making Charges</TableHead>
+                    <TableHead className="text-white font-semibold">Total Amount</TableHead>
+                    <TableHead className="text-white font-semibold">Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {invoices.map((invoice: InvoicesRecord) => {
+                    return (
+                      <TableRow key={invoice.id}>
+                        <TableCell className="font-mono text-sm">{invoice.No}</TableCell>
+                        <TableCell className="font-medium">{invoice.customer_name || 'N/A'}</TableCell>
+                        <TableCell>
+                          <Badge variant={getPaymentMethodBadge(invoice.type || 'cash')}>
+                            {t(invoice.type || 'cash')}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{invoice.subtotal}</TableCell>
+                        <TableCell>{invoice.making_charges}</TableCell>
+                        <TableCell>{invoice.total_amount}</TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="text-sm">
+                              {new Date(invoice.created || "").toLocaleDateString(isRTL ? "ar-JO" : "en-US")}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(invoice.created || "").toLocaleTimeString(isRTL ? "ar-JO" : "en-US")}
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </>
       )}
     </div>

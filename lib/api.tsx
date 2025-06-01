@@ -1,5 +1,5 @@
 import { getPocketBase } from "./pocketbase";
-import { InventoryRecord, InvoicesRecord, InvoicesResponse, InvoicesTypeOptions } from "./pocketbase-types";
+import { AdminsRecord, InventoryRecord, InvoicesRecord, InvoicesResponse, InvoicesTypeOptions } from "./pocketbase-types";
 
 export async function get_inventory() {
     const pb = getPocketBase()
@@ -113,13 +113,14 @@ export async function update_inventory_quantity(itemId: string, quantitySold: nu
     }
 }
 
-export async function get_invoices() {
+export async function get_invoices(filter?: string) {
     const pb = getPocketBase()
 
     try {
         const records = await pb.collection("invoices")
                                 .getList<InvoicesRecord>(1, 50, {
                                     expand: "customer",
+                                    filter: filter,
                                     sort: "-created"
                                 });
         if (records.totalItems > 0)
@@ -185,12 +186,14 @@ interface TransactionData {
     created: string
 }
 
-export async function get_admins() {
+export async function get_admins(filter: string) {
     const pb = getPocketBase()
 
     try {
         const records = await pb.collection("admins")
-                                .getList(1, 50);
+                                .getList<AdminsRecord>(1, 50, {
+                                    filter: filter
+                                });
         if (records.totalItems > 0)
             return (records.items)
         return ([])

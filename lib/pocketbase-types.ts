@@ -95,6 +95,7 @@ export type SuperusersRecord = {
 export enum AdminsRoleOptions {
 	"manager" = "manager",
 	"sales" = "sales",
+	"admin" = "admin",
 }
 export type AdminsRecord = {
 	avatar?: string
@@ -102,8 +103,11 @@ export type AdminsRecord = {
 	email: string
 	emailVisibility?: boolean
 	id: string
+	is_active?: boolean
+	last_login?: IsoDateString
 	name?: string
 	password: string
+	phone?: string
 	role?: AdminsRoleOptions
 	tokenKey: string
 	updated?: IsoDateString
@@ -131,13 +135,14 @@ export enum InventoryKaratOptions {
 	"E6" = "6",
 }
 export type InventoryRecord = {
+	cost_price?: number
+	created?: IsoDateString
 	id: string
 	item_id: string
 	item_name: string
 	item_type: InventoryItemTypeOptions
 	karat: InventoryKaratOptions
 	quantity?: number
-	cost_price?: number
 	selling_price?: number
 	updated?: IsoDateString
 	vendor_address?: string
@@ -145,7 +150,6 @@ export type InventoryRecord = {
 	vendor_name?: string
 	vendor_phone?: string
 	weight: number
-	created?: IsoDateString
 }
 
 export enum InvoicesTypeOptions {
