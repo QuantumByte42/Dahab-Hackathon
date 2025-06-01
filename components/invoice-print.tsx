@@ -4,7 +4,8 @@
 import React, { useRef, forwardRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Download, Printer } from 'lucide-react'
+import { Download, Printer, AlertCircle } from 'lucide-react'
+import { generatePDFWithFallback } from '@/utils/pdf-fallback'
 
 interface InvoiceItem {
   item_id: string
@@ -242,42 +243,18 @@ export function InvoicePrint({ invoiceData, onPrint, onDownloadPDF }: InvoicePri
   }
 
   const handleDownloadPDF = async () => {
-    if (invoiceRef.current) {
-      try {
-        const { default: html2canvas } = await import('html2canvas')
-        const { default: jsPDF } = await import('jspdf')
+    if (!invoiceRef.current) {
+      console.error('Invoice reference not available')
+      return
+    }
 
-        const canvas = await html2canvas(invoiceRef.current, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: '#ffffff'
-        })
+    const success = await generatePDFWithFallback(
+      invoiceRef.current, 
+      `dahab-invoice-${invoiceData.invoiceNumber}`
+    )
 
-        const imgData = canvas.toDataURL('image/png')
-        const pdf = new jsPDF('p', 'mm', 'a4')
-        
-        const imgWidth = 210 // A4 width in mm
-        const pageHeight = 295 // A4 height in mm
-        const imgHeight = (canvas.height * imgWidth) / canvas.width
-        let heightLeft = imgHeight
-        let position = 0
-
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-        heightLeft -= pageHeight
-
-        while (heightLeft >= 0) {
-          position = heightLeft - imgHeight
-          pdf.addPage()
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-          heightLeft -= pageHeight
-        }
-
-        pdf.save(`invoice-${invoiceData.invoiceNumber}.pdf`)
-        onDownloadPDF?.()
-      } catch (error) {
-        console.error('Error generating PDF:', error)
-        alert('Failed to generate PDF. Please try again.')
-      }
+    if (success) {
+      onDownloadPDF?.()
     }
   }
 
@@ -289,7 +266,11 @@ export function InvoicePrint({ invoiceData, onPrint, onDownloadPDF }: InvoicePri
           <Printer className="h-4 w-4" />
           Print Invoice
         </Button>
-        <Button onClick={handleDownloadPDF} className="gap-2">
+        <Button 
+          onClick={handleDownloadPDF} 
+          className="gap-2"
+          title="Download as PDF"
+        >
           <Download className="h-4 w-4" />
           Download PDF
         </Button>

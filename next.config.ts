@@ -16,6 +16,39 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  
+  // Webpack configuration for PDF libraries
+  webpack: (config, { isServer, dev }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        canvas: false,
+        encoding: false,
+        fs: false,
+        stream: false,
+        util: false,
+      }
+    }
+    
+    // Optimize for dynamic imports of PDF libraries
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        ...config.optimization.splitChunks,
+        cacheGroups: {
+          ...config.optimization.splitChunks?.cacheGroups,
+          pdf: {
+            test: /[\\/]node_modules[\\/](jspdf|html2canvas)[\\/]/,
+            name: 'pdf-libraries',
+            chunks: 'all',
+            priority: 10,
+          },
+        },
+      },
+    }
+    
+    return config
+  },
 };
 
 export default nextConfig;
