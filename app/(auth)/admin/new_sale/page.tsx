@@ -292,11 +292,14 @@ export default function SalesPage() {
         </Card>
 
         {/* Add Item Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Add Item to Sale</CardTitle>
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Add Item to Sale
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 p-6">
             <div className="space-y-2">
               <Label htmlFor="item_id">Item ID</Label>
               <Input
@@ -394,18 +397,18 @@ export default function SalesPage() {
               />
             </div>
             {currentItem.selling_price && (
-              <div className="p-3 bg-muted rounded-lg">
+              <div className="p-3 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg shadow-sm">
                 <div className="text-sm">
-                  <div className="flex justify-between">
-                    <span>Making Charges (12%):</span>
-                    <span>{calculateMakingCharges(Number.parseFloat(currentItem.selling_price)).toFixed(2)} JOD</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-amber-700 font-medium">Making Charges (12%):</span>
+                    <span className="font-bold text-amber-800">{calculateMakingCharges(Number.parseFloat(currentItem.selling_price)).toFixed(2)} JOD</span>
                   </div>
                 </div>
               </div>
             )}
             <Button 
                 onClick={addItemToSale} 
-                className="w-full gap-2"
+                className="w-full gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white shadow-lg transition-all duration-200"
                 disabled={!isCurretItem || outOfStock}>
                 {outOfStock ? (
                   <>Out of stock</>
@@ -420,11 +423,14 @@ export default function SalesPage() {
         </Card>
 
         {/* Sale Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Sale Summary</CardTitle>
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <Calculator className="h-5 w-5" />
+              Sale Summary
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 p-6">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Items:</span>
@@ -448,7 +454,7 @@ export default function SalesPage() {
             <div className="space-y-2">
               <Button
                 onClick={handleCompleteSale}
-                className="w-full gap-2"
+                className="w-full gap-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg transition-all duration-200"
                 disabled={saleItems.length === 0 || !customer.name || !transactionType || loading}
               >
                 <Calculator className="h-4 w-4" />
@@ -470,11 +476,14 @@ export default function SalesPage() {
 
       {/* Items in Current Sale */}
       {saleItems.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Items in Current Sale</CardTitle>
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              Items in Current Sale ({saleItems.length})
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <Table>
               <TableHeader>
                 <TableRow>
