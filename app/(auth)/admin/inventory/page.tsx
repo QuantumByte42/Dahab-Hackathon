@@ -14,6 +14,7 @@ import { Package, Plus, Search, Edit, Trash2, Building2, Phone, MapPin, User } f
 import { submitForm } from "@/lib/submit"
 import { get_inventory } from "@/lib/api"
 import { InventoryItemTypeOptions, InventoryKaratOptions, InventoryRecord } from "@/lib/pocketbase-types"
+import { getPocketBase } from "@/lib/pocketbase"
 
 export default function InventoryPage() {
   const { isRTL } = useLanguage()
@@ -22,14 +23,14 @@ export default function InventoryPage() {
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [newItem, setNewItem] = useState({
     id: "",
-    item_id: "QB4_0001",
+    item_id: "QB4_00005",
     item_name: "test",
     item_type: "Ring",
     weight: "5.1",
     karat: "21",
     cost_price: "150",
     selling_price: "180",
-    quantity: "2",
+    quantity: "5",
     vendor_name: "test",
     vendor_phone: "test",
     vendor_address: "test",
@@ -60,9 +61,13 @@ export default function InventoryPage() {
     e.preventDefault()
     const res = await submitForm(null, "inventory", newItem)
     if (res.record)
+    {
+      // TODO add new item to inventory
       console.log(res.msg)
+    }
     else
       console.error(res.msg)
+
     setShowAddDialog(false)
     // Reset form
     setNewItem({
@@ -100,6 +105,19 @@ export default function InventoryPage() {
       vendor_address: "",
       vendor_contact_person: "",
     })
+  }
+
+  const handleRemoveItemInventory = async (item: InventoryRecord) => {
+    const pb = getPocketBase()
+
+    try {
+      await pb.collection("inventory").delete(item.id)
+      // TODO remove item from inventory
+      // setInventory(inventory.filter((_item, i) => {_item.id !== item.id}))
+      console.log("success remove item")
+    } catch {
+      console.error("faild remove item")
+    }
   }
 
   return (
@@ -343,21 +361,21 @@ export default function InventoryPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredInventory.map((inventory) => (
-                <TableRow key={inventory.id}>
-                  <TableCell className="font-mono text-sm">{inventory.item_id}</TableCell>
-                  <TableCell className="font-medium">{inventory.item_name}</TableCell>
-                  <TableCell>{inventory.item_type}</TableCell>
-                  <TableCell>{inventory.weight}g</TableCell>
+              {filteredInventory.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-mono text-sm">{item.item_id}</TableCell>
+                  <TableCell className="font-medium">{item.item_name}</TableCell>
+                  <TableCell>{item.item_type}</TableCell>
+                  <TableCell>{item.weight}g</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{inventory.karat}K</Badge>
+                    <Badge variant="outline">{item.karat}K</Badge>
                   </TableCell>
                   <TableCell>
                     <Dialog>
                       <DialogTrigger asChild>
                         <div className="flex items-center gap-1">
                           <Building2 className="h-3 w-3" />
-                          <span className="text-sm">{inventory.vendor_name}</span>
+                          <span className="text-sm">{item.vendor_name}</span>
                         </div>
                       </DialogTrigger>
                       <DialogContent>
@@ -367,20 +385,20 @@ export default function InventoryPage() {
                         <div className="flex flex-col items-start justify-center space-y-2 p-2">
                           <div className="flex items-center gap-2 text-lg font-medium">
                           <Building2 className="h-5 w-5" />
-                          {inventory.vendor_name}
+                          {item.vendor_name}
                           </div>
                           <div className="text-sm text-muted-foreground space-y-2">
                           <div className="flex items-center gap-2">
                             <Phone className="h-4 w-4" />
-                            {inventory.vendor_phone}
+                            {item.vendor_phone}
                           </div>
                           <div className="flex items-center gap-2">
                             <MapPin className="h-4 w-4" />
-                            {inventory.vendor_address}
+                            {item.vendor_address}
                           </div>
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4" />
-                            {inventory.vendor_contact_person}
+                            {item.vendor_contact_person}
                           </div>
                           </div>
                         </div>
@@ -388,20 +406,20 @@ export default function InventoryPage() {
                   </Dialog>
                   </TableCell>
                   <TableCell>
-                    {inventory.cost_price?.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
+                    {item.cost_price?.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
                   </TableCell>
                   <TableCell>
-                    {inventory.selling_price?.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
+                    {item.selling_price?.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={inventory.quantity && inventory.quantity < 5 ? "destructive" : "default"}>{inventory.quantity}</Badge>
+                    <Badge variant={item.quantity && item.quantity < 5 ? "destructive" : "default"}>{item.quantity}</Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline">
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={async () => {await handleRemoveItemInventory(item)}}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
