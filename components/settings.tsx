@@ -5,12 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLanguage } from "@/contexts/language-context"
 import { SettingsIcon, Save } from "lucide-react"
 
 export function Settings() {
-  const { t, language, setLanguage } = useLanguage()
+  const { t, language } = useLanguage()
   const [goldPrices, setGoldPrices] = useState({
     "18": "35.50",
     "21": "41.25",
