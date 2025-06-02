@@ -27,7 +27,7 @@ export default function InvoicesPage() {
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        // setLoading(true)
+        setLoading(true)
         let filter = ""
         if (searchTerm !== "")
           filter += (filter === ""? "" : " && ") 
@@ -40,8 +40,7 @@ export default function InvoicesPage() {
             + `type = '${paymentFilter}'`
         const data = await get_invoices(filter) 
         setInvoices(data)
-        // setFilter(filter)
-      } catch (error) {
+      } catch {
         // Show error toast
         toast.error("error fetch invoices", {
           position: isRTL ? "top-left" : "top-right",
@@ -49,12 +48,12 @@ export default function InvoicesPage() {
           closeOnClick: true,
         })
       } finally {
-        // setLoading(false)
+        setLoading(false)
       }
     }
 
     fetchInvoices()
-  }, [searchTerm, dateFilter, paymentFilter])
+  }, [searchTerm, dateFilter, paymentFilter, isRTL])
 
 
   const totalAmount = invoices.reduce((sum: number, invoice: InvoicesRecord) => sum + (invoice.total_amount || 0), 0)

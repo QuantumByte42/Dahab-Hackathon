@@ -192,7 +192,7 @@ export default function SalesPage() {
       for (const item of saleItems) {
         try {
           await update_inventory_quantity(item.item_id, item.quantity)
-        } catch (error) {
+        } catch {
           toast.update(loadingToastId, {
             render: messages.failedUpdateInventory,
             type: "error",
