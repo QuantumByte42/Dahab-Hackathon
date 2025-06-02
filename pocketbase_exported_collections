@@ -173,12 +173,12 @@
     },
     {
         "id": "_pb_users_auth_",
-        "listRule": "id = @request.auth.id",
-        "viewRule": "id = @request.auth.id",
+        "listRule": "",
+        "viewRule": "",
         "createRule": "",
-        "updateRule": "id = @request.auth.id",
-        "deleteRule": "id = @request.auth.id",
-        "name": "users",
+        "updateRule": "",
+        "deleteRule": "",
+        "name": "admins",
         "type": "auth",
         "fields": [
             {
@@ -287,6 +287,75 @@
             },
             {
                 "hidden": false,
+                "id": "select1466534506",
+                "maxSelect": 1,
+                "name": "role",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "select",
+                "values": [
+                    "manager",
+                    "sales",
+                    "admin"
+                ]
+            },
+            {
+                "hidden": false,
+                "id": "bool458715613",
+                "name": "is_active",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "bool"
+            },
+            {
+                "autogeneratePattern": "",
+                "hidden": false,
+                "id": "text1146066909",
+                "max": 0,
+                "min": 0,
+                "name": "phone",
+                "pattern": "",
+                "presentable": false,
+                "primaryKey": false,
+                "required": false,
+                "system": false,
+                "type": "text"
+            },
+            {
+                "hidden": false,
+                "id": "date3359898891",
+                "max": "",
+                "min": "",
+                "name": "last_login",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "date"
+            },
+            {
+                "hidden": false,
+                "id": "json79351770",
+                "maxSize": 0,
+                "name": "portable_dahab_system_style_preferences",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "json"
+            },
+            {
+                "hidden": false,
+                "id": "json3512896695",
+                "maxSize": 0,
+                "name": "portable_dahab_system_pricing_preferences",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "json"
+            },
+            {
+                "hidden": false,
                 "id": "autodate2990389176",
                 "name": "created",
                 "onCreate": true,
@@ -307,8 +376,8 @@
             }
         ],
         "indexes": [
-            "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `users` (`tokenKey`)",
-            "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''"
+            "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `admins` (`tokenKey`)",
+            "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `admins` (`email`) WHERE `email` != ''"
         ],
         "system": false,
         "authRule": "",
@@ -774,269 +843,6 @@
         "system": true
     },
     {
-        "id": "pbc_108570809",
-        "listRule": "",
-        "viewRule": "",
-        "createRule": "",
-        "updateRule": "",
-        "deleteRule": "",
-        "name": "customers",
-        "type": "base",
-        "fields": [
-            {
-                "autogeneratePattern": "[a-z0-9]{15}",
-                "hidden": false,
-                "id": "text3208210256",
-                "max": 15,
-                "min": 15,
-                "name": "id",
-                "pattern": "^[a-z0-9]+$",
-                "presentable": false,
-                "primaryKey": true,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text1579384326",
-                "max": 0,
-                "min": 0,
-                "name": "name",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": false,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text1587448267",
-                "max": 0,
-                "min": 0,
-                "name": "address",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": false,
-                "system": false,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text1146066909",
-                "max": 0,
-                "min": 0,
-                "name": "phone",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": false,
-                "system": false,
-                "type": "text"
-            },
-            {
-                "exceptDomains": null,
-                "hidden": false,
-                "id": "email3885137012",
-                "name": "email",
-                "onlyDomains": null,
-                "presentable": false,
-                "required": false,
-                "system": false,
-                "type": "email"
-            },
-            {
-                "hidden": false,
-                "id": "number381439464",
-                "max": null,
-                "min": null,
-                "name": "total_purchases",
-                "onlyInt": false,
-                "presentable": false,
-                "required": false,
-                "system": false,
-                "type": "number"
-            },
-            {
-                "hidden": false,
-                "id": "number1360185160",
-                "max": null,
-                "min": null,
-                "name": "purchase_count",
-                "onlyInt": false,
-                "presentable": false,
-                "required": false,
-                "system": false,
-                "type": "number"
-            },
-            {
-                "hidden": false,
-                "id": "date427201701",
-                "max": "",
-                "min": "",
-                "name": "last_purchase",
-                "presentable": false,
-                "required": false,
-                "system": false,
-                "type": "date"
-            },
-            {
-                "hidden": false,
-                "id": "autodate2990389176",
-                "name": "created",
-                "onCreate": true,
-                "onUpdate": false,
-                "presentable": false,
-                "system": false,
-                "type": "autodate"
-            },
-            {
-                "hidden": false,
-                "id": "autodate3332085495",
-                "name": "updated",
-                "onCreate": true,
-                "onUpdate": true,
-                "presentable": false,
-                "system": false,
-                "type": "autodate"
-            }
-        ],
-        "indexes": [],
-        "system": false
-    },
-    {
-        "id": "pbc_3735627160",
-        "listRule": "",
-        "viewRule": "",
-        "createRule": "",
-        "updateRule": "",
-        "deleteRule": "",
-        "name": "employees",
-        "type": "base",
-        "fields": [
-            {
-                "autogeneratePattern": "[A-Z]{2}[0-9]{13}",
-                "hidden": false,
-                "id": "text3208210256",
-                "max": 15,
-                "min": 15,
-                "name": "id",
-                "pattern": "^[A-Z]{2}[0-9]{13}$",
-                "presentable": false,
-                "primaryKey": true,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text1579384326",
-                "max": 0,
-                "min": 0,
-                "name": "name",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": false,
-                "system": false,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text3885137012",
-                "max": 0,
-                "min": 0,
-                "name": "email",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": false,
-                "system": false,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text1146066909",
-                "max": 0,
-                "min": 0,
-                "name": "phone",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": false,
-                "system": false,
-                "type": "text"
-            },
-            {
-                "hidden": false,
-                "id": "select1466534506",
-                "maxSelect": 1,
-                "name": "role",
-                "presentable": false,
-                "required": false,
-                "system": false,
-                "type": "select",
-                "values": [
-                    "Manager",
-                    "Cashier"
-                ]
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "text1737938260",
-                "max": 0,
-                "min": 0,
-                "name": "merchant_id",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": false,
-                "system": false,
-                "type": "text"
-            },
-            {
-                "hidden": false,
-                "id": "bool458715613",
-                "name": "is_active",
-                "presentable": false,
-                "required": false,
-                "system": false,
-                "type": "bool"
-            },
-            {
-                "hidden": false,
-                "id": "autodate2990389176",
-                "name": "created",
-                "onCreate": true,
-                "onUpdate": false,
-                "presentable": false,
-                "system": false,
-                "type": "autodate"
-            },
-            {
-                "hidden": false,
-                "id": "autodate3332085495",
-                "name": "updated",
-                "onCreate": true,
-                "onUpdate": true,
-                "presentable": false,
-                "system": false,
-                "type": "autodate"
-            }
-        ],
-        "indexes": [],
-        "system": false
-    },
-    {
         "id": "pbc_3573984430",
         "listRule": "",
         "viewRule": "",
@@ -1092,7 +898,7 @@
                 "hidden": false,
                 "id": "select2363381545",
                 "maxSelect": 1,
-                "name": "type",
+                "name": "item_type",
                 "presentable": false,
                 "required": true,
                 "system": false,
@@ -1104,7 +910,8 @@
                     "Earrings",
                     "Pendant",
                     "Chain",
-                    "Bangle"
+                    "Bangle",
+                    "Crown"
                 ]
             },
             {
@@ -1137,19 +944,6 @@
                     "10",
                     "6"
                 ]
-            },
-            {
-                "cascadeDelete": false,
-                "collectionId": "pbc_3732325883",
-                "hidden": false,
-                "id": "relation4112659446",
-                "maxSelect": 1,
-                "minSelect": 0,
-                "name": "vendor",
-                "presentable": false,
-                "required": false,
-                "system": false,
-                "type": "relation"
             },
             {
                 "hidden": false,
@@ -1186,6 +980,62 @@
                 "required": false,
                 "system": false,
                 "type": "number"
+            },
+            {
+                "autogeneratePattern": "",
+                "hidden": false,
+                "id": "text4067619854",
+                "max": 0,
+                "min": 0,
+                "name": "vendor_name",
+                "pattern": "",
+                "presentable": false,
+                "primaryKey": false,
+                "required": false,
+                "system": false,
+                "type": "text"
+            },
+            {
+                "autogeneratePattern": "",
+                "hidden": false,
+                "id": "text1376359837",
+                "max": 0,
+                "min": 0,
+                "name": "vendor_phone",
+                "pattern": "",
+                "presentable": false,
+                "primaryKey": false,
+                "required": false,
+                "system": false,
+                "type": "text"
+            },
+            {
+                "autogeneratePattern": "",
+                "hidden": false,
+                "id": "text3730648886",
+                "max": 0,
+                "min": 0,
+                "name": "vendor_address",
+                "pattern": "",
+                "presentable": false,
+                "primaryKey": false,
+                "required": false,
+                "system": false,
+                "type": "text"
+            },
+            {
+                "autogeneratePattern": "",
+                "hidden": false,
+                "id": "text1566926480",
+                "max": 0,
+                "min": 0,
+                "name": "vendor_contact_person",
+                "pattern": "",
+                "presentable": false,
+                "primaryKey": false,
+                "required": false,
+                "system": false,
+                "type": "text"
             },
             {
                 "hidden": false,
@@ -1244,25 +1094,40 @@
                 "max": 0,
                 "min": 0,
                 "name": "No",
-                "pattern": "INV-^[0-9]+$",
+                "pattern": "",
                 "presentable": false,
                 "primaryKey": false,
-                "required": true,
+                "required": false,
                 "system": false,
                 "type": "text"
             },
             {
-                "cascadeDelete": false,
-                "collectionId": "pbc_108570809",
+                "autogeneratePattern": "",
                 "hidden": false,
-                "id": "relation2168032777",
-                "maxSelect": 1,
-                "minSelect": 0,
-                "name": "customer",
+                "id": "text179493489",
+                "max": 0,
+                "min": 0,
+                "name": "customer_name",
+                "pattern": "",
                 "presentable": false,
-                "required": true,
+                "primaryKey": false,
+                "required": false,
                 "system": false,
-                "type": "relation"
+                "type": "text"
+            },
+            {
+                "autogeneratePattern": "",
+                "hidden": false,
+                "id": "text2323309286",
+                "max": 0,
+                "min": 0,
+                "name": "customer_phone",
+                "pattern": "",
+                "presentable": false,
+                "primaryKey": false,
+                "required": false,
+                "system": false,
+                "type": "text"
             },
             {
                 "hidden": false,
@@ -1316,7 +1181,7 @@
                 "maxSelect": 1,
                 "name": "type",
                 "presentable": false,
-                "required": true,
+                "required": false,
                 "system": false,
                 "type": "select",
                 "values": [
@@ -1349,13 +1214,13 @@
         "system": false
     },
     {
-        "id": "pbc_3732325883",
+        "id": "pbc_1615648943",
         "listRule": "",
         "viewRule": "",
         "createRule": "",
         "updateRule": "",
         "deleteRule": "",
-        "name": "vendors",
+        "name": "reports",
         "type": "base",
         "fields": [
             {
@@ -1375,16 +1240,78 @@
             {
                 "autogeneratePattern": "",
                 "hidden": false,
-                "id": "text1579384326",
+                "id": "text724990059",
                 "max": 0,
                 "min": 0,
-                "name": "name",
+                "name": "title",
                 "pattern": "",
                 "presentable": false,
                 "primaryKey": false,
                 "required": false,
                 "system": false,
                 "type": "text"
+            },
+            {
+                "autogeneratePattern": "",
+                "hidden": false,
+                "id": "text2363381545",
+                "max": 0,
+                "min": 0,
+                "name": "type",
+                "pattern": "",
+                "presentable": false,
+                "primaryKey": false,
+                "required": false,
+                "system": false,
+                "type": "text"
+            },
+            {
+                "hidden": false,
+                "id": "date2579769476",
+                "max": "",
+                "min": "",
+                "name": "date_from",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "date"
+            },
+            {
+                "hidden": false,
+                "id": "date3492381695",
+                "max": "",
+                "min": "",
+                "name": "date_to",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "date"
+            },
+            {
+                "hidden": false,
+                "id": "file2359244304",
+                "maxSelect": 1,
+                "maxSize": 52428800,
+                "mimeTypes": [],
+                "name": "file",
+                "presentable": false,
+                "protected": false,
+                "required": false,
+                "system": false,
+                "thumbs": [],
+                "type": "file"
+            },
+            {
+                "hidden": false,
+                "id": "number4156564586",
+                "max": null,
+                "min": null,
+                "name": "size",
+                "onlyInt": false,
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "number"
             },
             {
                 "hidden": false,
