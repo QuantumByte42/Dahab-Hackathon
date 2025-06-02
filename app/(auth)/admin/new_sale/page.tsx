@@ -16,12 +16,12 @@ import InvoicePrint from "@/components/invoice-print"
 import { toast } from "react-toastify"
 
 const messages = {
-  loading: "",
-  success: "",
-  error: "",
-  outOfStock: "",
-  FailedCreateInvoice: "",
-  failedUpdateInventory: ""
+  loading: "Create new invoice, wait...",
+  success: "Success add invoice",
+  error: "Failed create invoice",
+  outOfStock: "some item out of stock",
+  FailedCreateInvoice: "Failed Create invoice",
+  failedUpdateInventory: "Failed update inventory"
 }
 
 export default function SalesPage() {

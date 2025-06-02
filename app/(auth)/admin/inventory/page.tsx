@@ -18,11 +18,12 @@ import { getPocketBase } from "@/lib/pocketbase"
 import { toast } from "react-toastify"
 
 const messages = {
-  loading: "",
-  success_add: "",
-  error_add: "",
-  success_delete: "",
-  error_delete: "",
+  loading_add: "loading new item, wait...",
+  success_add: "success add new item",
+  error_add: "failed add item",
+  loading_delete: "Delete item, wait...",
+  success_delete: "success delete item",
+  error_delete: "failed delete item",
 }
 
 export default function InventoryPage() {
@@ -64,6 +65,17 @@ export default function InventoryPage() {
     }
     setInventoryStats(stats)
   }
+  
+  useEffect(() => {
+    // Initial load of inventory data
+    const initialFetch = async () => {
+      const inventory = await get_inventory("")
+      setInventory(inventory);
+      calculateStats(inventory);
+    }
+    initialFetch()
+  }, [])
+  
   useEffect(() => {
     const fetch = async () => {
       let filter = ""
@@ -72,6 +84,7 @@ export default function InventoryPage() {
       setFilter(filter)
       const inventory = await get_inventory(filter)
       setInventory(inventory);
+      calculateStats(inventory);
     }
     fetch()
   }, [searchTerm])
@@ -84,7 +97,7 @@ export default function InventoryPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
      // Show loading toast
-    const loadingToastId = toast.loading(messages.loading, {
+    const loadingToastId = toast.loading(messages.loading_add, {
       position: isRTL ? "top-left" : "top-right",
     })
     const res = await submitForm(null, "inventory", newItem)
@@ -151,7 +164,7 @@ export default function InventoryPage() {
     const pb = getPocketBase()
 
     // Show loading toast
-    const loadingToastId = toast.loading(messages.loading, {
+    const loadingToastId = toast.loading(messages.loading_delete, {
       position: isRTL ? "top-left" : "top-right",
     })
     try {
@@ -404,7 +417,7 @@ export default function InventoryPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-green-600 text-sm font-medium">Total Value</p>
-                <p className="text-2xl font-bold text-green-800">${inventoryStats.totalValue.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-green-800">{inventoryStats.totalValue.toFixed(2)} {isRTL ? "د.أ" : "JOD"}</p>
               </div>
               <div className="p-3 bg-gradient-to-br from-green-400 to-green-500 rounded-xl">
                 <DollarSign className="h-6 w-6 text-white" />
