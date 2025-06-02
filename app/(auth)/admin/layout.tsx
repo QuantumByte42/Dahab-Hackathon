@@ -45,6 +45,15 @@ export default function RootLayout({
             </SidebarInset>
           </SidebarProvider>
         </LanguageProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('load', () => {
+                document.documentElement.classList.add('loaded');
+              });
+            `,
+          }}
+        />
       </body>
     </html>
   );

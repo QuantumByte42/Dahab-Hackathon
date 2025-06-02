@@ -10,6 +10,7 @@ interface LanguageContextType {
   setLanguage: (lang: Language) => void
   t: (key: string) => string
   isRTL: boolean
+  isLoaded: boolean
 }
 
 const translations = {
@@ -182,7 +183,26 @@ const translations = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>("ar") //Arabic is now default
+  // Always start with Arabic to match server rendering
+  const [language, setLanguageState] = useState<Language>('ar')
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  // Load from localStorage only after mount (client-side only)
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('preferred-language') as Language
+    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ar')) {
+      setLanguageState(savedLanguage)
+    }
+    setIsLoaded(true)
+  }, [])
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang)
+    localStorage.setItem('preferred-language', lang)
+    // Update document immediately when language changes
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr"
+    document.documentElement.lang = lang
+  }
 
   const t = (key: string): string => {
     return translations[language][key as keyof (typeof translations)["en"]] || key
@@ -190,12 +210,19 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const isRTL = language === "ar"
 
+  // Update document properties only after hydration
   useEffect(() => {
-    document.documentElement.dir = isRTL ? "rtl" : "ltr"
-    document.documentElement.lang = language
-  }, [isRTL, language])
+    if (isLoaded) {
+      document.documentElement.dir = isRTL ? "rtl" : "ltr"
+      document.documentElement.lang = language
+    }
+  }, [isRTL, language, isLoaded])
 
-  return <LanguageContext.Provider value={{ language, setLanguage, t, isRTL }}>{children}</LanguageContext.Provider>
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t, isRTL, isLoaded }}>
+      {children}
+    </LanguageContext.Provider>
+  )
 }
 
 export function useLanguage() {

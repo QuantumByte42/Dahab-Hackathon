@@ -175,3 +175,22 @@
 .sidebar-separator {
   margin: var(--separator-margin);
 }
+
+/* Prevent layout shift during hydration */
+[data-sidebar="sidebar"] {
+  transition: none !important;
+}
+
+/* Re-enable transitions after page load */
+html.loaded [data-sidebar="sidebar"] {
+  transition: all 200ms ease-linear !important;
+}
+
+/* RTL-specific sidebar positioning */
+[dir="rtl"] [data-side="right"] {
+  right: 0;
+}
+
+[dir="ltr"] [data-side="left"] {
+  left: 0;
+}
