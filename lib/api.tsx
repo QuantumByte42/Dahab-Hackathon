@@ -1,5 +1,5 @@
 import { getPocketBase } from "./pocketbase";
-import { AdminsRecord, InventoryRecord, InvoicesRecord, InvoicesResponse, InvoicesTypeOptions } from "./pocketbase-types";
+import { AdminsRecord, InventoryRecord, InvoicesRecord, InvoicesTypeOptions } from "./pocketbase-types";
 
 export async function get_inventory(filter: string) {
     const pb = getPocketBase()

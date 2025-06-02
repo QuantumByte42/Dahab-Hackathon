@@ -21,7 +21,7 @@ export function Inventory() {
     async function fetchInventory() {
       try {
         setLoading(true)
-        const data = await get_inventory()
+        const data = await get_inventory("")
         setInventory(data)
       } catch (error) {
         console.error("Error fetching inventory:", error)
@@ -36,7 +36,7 @@ export function Inventory() {
   const filteredInventory = inventory.filter(
     (item) =>
       item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.item_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.item_id.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
@@ -106,7 +106,7 @@ export function Inventory() {
                 filteredInventory.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{item.item_name}</TableCell>
-                    <TableCell>{item.type}</TableCell>
+                    <TableCell>{item.item_type}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{item.karat}K</Badge>
                     </TableCell>
