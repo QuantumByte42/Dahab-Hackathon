@@ -33,8 +33,8 @@ export default function Dashboard() {
             <div>
               <h3 className="text-lg font-medium text-red-700">Error Loading Dashboard</h3>
               <p className="text-red-600">{error}</p>
-              <Button 
-                onClick={() => refetch()} 
+              <Button
+                onClick={() => refetch()}
                 className="mt-4 bg-amber-600 hover:bg-amber-700"
               >
                 Try Again
@@ -70,7 +70,7 @@ export default function Dashboard() {
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
-        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
+        <Card className="rounded-sm border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-amber-800">{t("dailySales")}</CardTitle>
             <TrendingUp className="h-5 w-5 text-amber-600" />
@@ -83,7 +83,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
+        <Card className="rounded-sm border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-amber-800">{t("totalGoldSold")}</CardTitle>
             <Weight className="h-5 w-5 text-amber-600" />
@@ -96,7 +96,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
+        <Card className="rounded-sm border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-amber-800">Transactions Today</CardTitle>
             <Coins className="h-5 w-5 text-amber-600" />
@@ -107,7 +107,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
+        <Card className="rounded-sm border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover:shadow-lg transition-all duration-300 hover:shadow-amber-200/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-amber-800">Monthly Revenue</CardTitle>
             <Calendar className="h-5 w-5 text-amber-600" />
@@ -123,7 +123,7 @@ export default function Dashboard() {
 
       {/* Additional Stats Row */}
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-sky-50 hover:shadow-lg transition-all duration-300 hover:shadow-blue-200/50">
+        <Card className="rounded-sm border-blue-200 bg-gradient-to-br from-blue-50 to-sky-50 hover:shadow-lg transition-all duration-300 hover:shadow-blue-200/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-blue-800">Inventory Value</CardTitle>
             <Package className="h-5 w-5 text-blue-600" />
@@ -136,7 +136,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-all duration-300 hover:shadow-green-200/50">
+        <Card className="rounded-sm border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-all duration-300 hover:shadow-green-200/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-green-800">Active Employees</CardTitle>
             <Users className="h-5 w-5 text-green-600" />
@@ -147,7 +147,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50 hover:shadow-lg transition-all duration-300 hover:shadow-purple-200/50">
+        <Card className="rounded-sm border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50 hover:shadow-lg transition-all duration-300 hover:shadow-purple-200/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-purple-800">Avg. Order Value</CardTitle>
             <DollarSign className="h-5 w-5 text-purple-600" />
@@ -161,35 +161,38 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Low Stock Alert & Top Selling Items */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Low Stock Alert */}
-        <Card className="border-red-200 bg-gradient-to-br from-red-50 to-pink-50">
-          <CardHeader className="bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-t-lg">
+      {/* تنبيهات المخزون المنخفض و أفضل المنتجات مبيعًا */}
+      <div className="grid gap-6 md:grid-cols-2" dir="rtl">
+
+        {/* تنبيه المخزون المنخفض */}
+        <Card className="rounded-md border-red-200 bg-gradient-to-br from-red-50 to-pink-50">
+          <CardHeader className="bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-t-md">
             <CardTitle className="text-xl font-semibold flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
-              Low Stock Alert
+              تنبيه المخزون المنخفض
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
               {data.lowStockItems.length === 0 ? (
-                <div className="text-center py-8 text-green-600">
-                  <p>All items are well stocked!</p>
+                <div className="text-center py-8 text-green-600 font-medium">
+                  جميع الأصناف متوفرة بشكل جيد
                 </div>
               ) : (
                 data.lowStockItems.map((item) => (
-                  <div 
-                    key={item.id} 
-                    className="flex items-center justify-between p-4 border border-red-100 rounded-lg bg-gradient-to-r from-red-25 to-pink-25 hover:shadow-md transition-all duration-300"
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-4 border border-red-100 rounded-lg bg-gradient-to-r from-red-25 to-pink-25 hover:shadow-md transition duration-300"
                   >
                     <div className="space-y-1">
                       <p className="font-semibold text-red-900">{item.item_name}</p>
-                      <p className="text-sm text-red-700">{item.item_type} - {item.karat}K</p>
+                      <p className="text-sm text-red-700">
+                        {item.item_type} - {item.karat} قيراط
+                      </p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left">
                       <p className="font-bold text-lg text-red-900">{item.quantity}</p>
-                      <p className="text-sm text-red-600">remaining</p>
+                      <p className="text-sm text-red-600">متبقي</p>
                     </div>
                   </div>
                 ))
@@ -198,40 +201,40 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Top Selling Items */}
-        <Card className="border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
-          <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-t-lg">
+        {/* أفضل المنتجات مبيعًا */}
+        <Card className="rounded-md border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+          <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-t-md">
             <CardTitle className="text-xl font-semibold flex items-center gap-2">
               <ShoppingBag className="h-5 w-5" />
-              Top Selling Items
+              أفضل المنتجات مبيعًا
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
               {data.topSellingItems.length === 0 ? (
-                <div className="text-center py-8 text-green-600">
-                  <p>No sales data available</p>
+                <div className="text-center py-8 text-green-600 font-medium">
+                  لا توجد بيانات مبيعات حالية
                 </div>
               ) : (
                 data.topSellingItems.map((item, index) => (
-                  <div 
-                    key={item.item_type} 
-                    className="flex items-center justify-between p-4 border border-green-100 rounded-lg bg-gradient-to-r from-green-25 to-emerald-25 hover:shadow-md transition-all duration-300"
+                  <div
+                    key={item.item_type}
+                    className="flex items-center justify-between p-4 border border-green-100 rounded-lg bg-gradient-to-r from-green-25 to-emerald-25 hover:shadow-md transition duration-300"
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-reverse space-x-3">
                       <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
                         {index + 1}
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1 text-right">
                         <p className="font-semibold text-green-900">{item.item_type}</p>
-                        <p className="text-sm text-green-700">{item.total_sold} sold</p>
+                        <p className="text-sm text-green-700">{item.total_sold} تم بيعه</p>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left">
                       <p className="font-bold text-lg text-green-900">
                         {item.revenue.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
                       </p>
-                      <p className="text-sm text-green-600">revenue</p>
+                      <p className="text-sm text-green-600">الإيرادات</p>
                     </div>
                   </div>
                 ))
@@ -241,31 +244,31 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Recent Transactions */}
-      <Card className="border-amber-200 bg-gradient-to-br from-white to-amber-50">
-        <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
-          <CardTitle className="text-xl font-semibold">{t("recentTransactions")}</CardTitle>
+      {/* المعاملات الأخيرة */}
+      <Card className="rounded-md border-amber-200 bg-gradient-to-br from-white to-amber-50 mt-6" dir="rtl">
+        <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-md">
+          <CardTitle className="text-xl font-semibold">آخر المعاملات</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-4">
             {data.recentTransactions.length === 0 ? (
-              <div className="text-center py-8 text-amber-600">
-                <p>No recent transactions found</p>
+              <div className="text-center py-8 text-amber-600 font-medium">
+                لا توجد معاملات حديثة
               </div>
             ) : (
               data.recentTransactions.map((transaction) => (
-                <div 
-                  key={transaction.id} 
-                  className="flex items-center justify-between p-4 border border-amber-100 rounded-lg bg-gradient-to-r from-amber-25 to-yellow-25 hover:shadow-md transition-all duration-300 hover:border-amber-300"
+                <div
+                  key={transaction.id}
+                  className="flex items-center justify-between p-4 border border-amber-100 rounded-lg bg-gradient-to-r from-amber-25 to-yellow-25 hover:shadow-md transition duration-300 hover:border-amber-300"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full"></div>
+                  <div className="space-y-1 text-right">
+                    <div className="flex items-center space-x-reverse space-x-2">
+                      <div className="w-2 h-2 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full" />
                       <p className="font-semibold text-amber-900">{transaction.customer_name}</p>
                     </div>
-                    <p className="text-sm text-amber-700 ml-4">{transaction.gold_type}</p>
+                    <p className="text-sm text-amber-700">{transaction.gold_type}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-left">
                     <p className="font-bold text-lg text-amber-900">
                       {transaction.total_amount_jod.toFixed(2)} {isRTL ? "د.أ" : "JOD"}
                     </p>
@@ -279,6 +282,7 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
     </div>
   )
 }
