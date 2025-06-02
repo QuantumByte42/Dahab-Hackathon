@@ -7,10 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Gem, Shield, TrendingUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-context';
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import clsx from 'clsx';
 
 export default function HomePage() {
-  const { t, isRTL } = useLanguage()
+  const { t, isRTL, language, setLanguage } = useLanguage()
   const [state, action, pending] = useActionState(login, undefined)
   const router = useRouter()
 
@@ -22,11 +24,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
-      <div className={clsx(
-        "flex flex-col lg:flex-row min-h-screen",
-        isRTL && "lg:flex-row-reverse"
-      )}>
-        {/* Branding side */}
+      <div className="flex flex-col lg:flex-row min-h-screen">
+        {/* Branding Side - Always on Left */}
         <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
           <div className="max-w-md mx-auto lg:mx-0">
             <div className={clsx(
@@ -86,9 +85,21 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+          <div className="space-y-2">
+                            <Label htmlFor="language">{t("language")}</Label>
+                            <Select value={language} onValueChange={(value: "en" | "ar") => setLanguage(value)}>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="en">{t("english")}</SelectItem>
+                                <SelectItem value="ar">{t("arabic")}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
         </div>
 
-        {/* Login form side */}
+        {/* Login Form - Always on Right */}
         <div className="lg:w-1/2 p-8 lg:p-12 flex items-center justify-center bg-white/60 backdrop-blur-sm">
           <div className="w-full max-w-md">
             <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100/50 backdrop-blur-lg">
