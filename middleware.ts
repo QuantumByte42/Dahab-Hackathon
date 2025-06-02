@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPocketBase } from './lib/pocketbase'
+import { submitForm } from './lib/submit'
 
 export default async function middleware(req: NextRequest) {
     const res = NextResponse.next()
@@ -11,8 +12,14 @@ export default async function middleware(req: NextRequest) {
 
         pb.authStore.loadFromCookie(token)
 
-        await pb.collection("admins").authRefresh()
-        
+        const user = await pb.collection("admins").authRefresh()
+        if (user.record)
+        {
+          await submitForm(user.record.id, "admins", {
+            last_login: new Date()
+          })
+        }
+
         return res
       } catch (error) {
         console.log("authRefresh:", error)

@@ -9,7 +9,8 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator"
 import { LogoutButton } from "@/components/logout-button"
 import { ShoppingCart } from "lucide-react"
-
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +46,18 @@ export default function RootLayout({
             </SidebarInset>
           </SidebarProvider>
         </LanguageProvider>
+        <ToastContainer 
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `

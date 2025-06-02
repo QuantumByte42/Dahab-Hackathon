@@ -10,17 +10,33 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLanguage } from "@/contexts/language-context"
-import { Package, Plus, Search, Edit, Trash2, Building2, Phone, MapPin, User } from "lucide-react"
+import { Package, Plus, Search, Edit, Trash2, Building2, Phone, MapPin, User, DollarSign, AlertTriangle, Weight, Hash } from "lucide-react"
 import { submitForm } from "@/lib/submit"
 import { get_inventory } from "@/lib/api"
 import { InventoryItemTypeOptions, InventoryKaratOptions, InventoryRecord } from "@/lib/pocketbase-types"
 import { getPocketBase } from "@/lib/pocketbase"
+import { toast } from "react-toastify"
+
+const messages = {
+  loading: "",
+  success_add: "",
+  error_add: "",
+  success_delete: "",
+  error_delete: "",
+}
 
 export default function InventoryPage() {
   const { isRTL } = useLanguage()
   const [searchTerm, setSearchTerm] = useState("")
   const [inventory, setInventory] = useState<InventoryRecord[]>([])
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [filter, setFilter] = useState("")
+  const [inventoryStats, setInventoryStats] = useState({
+    totalItems: 0,
+    totalValue: 0,
+    lowStockCount: 0,
+    totalWeight: 0
+  })
   const [newItem, setNewItem] = useState({
     id: "",
     item_id: "QB4_00005",
@@ -37,20 +53,28 @@ export default function InventoryPage() {
     vendor_contact_person: "test",
   })
 
-  const filteredInventory = inventory.filter(
-    (item) =>
-      item.item_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.item_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.item_id.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
 
+  // Calculate inventory statistics
+  const calculateStats = (inventoryData: InventoryRecord[]) => {
+    const stats = {
+      totalItems: inventoryData.length,
+      totalValue: inventoryData.reduce((sum, item) => sum + ((item.cost_price || 0) * (item.quantity || 0)), 0),
+      lowStockCount: inventoryData.filter(item => (item.quantity || 0) <= 5).length,
+      totalWeight: inventoryData.reduce((sum, item) => sum + ((item.weight || 0) * (item.quantity || 0)), 0)
+    }
+    setInventoryStats(stats)
+  }
   useEffect(() => {
     const fetch = async () => {
-      const inventory = await get_inventory()
+      let filter = ""
+      if (searchTerm !== undefined)
+          filter = `item_name ~ '${searchTerm}' || item_type ~ '${searchTerm}' || item_id ~ '${searchTerm}'`
+      setFilter(filter)
+      const inventory = await get_inventory(filter)
       setInventory(inventory);
     }
     fetch()
-  }, [])
+  }, [searchTerm])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -59,14 +83,30 @@ export default function InventoryPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+     // Show loading toast
+    const loadingToastId = toast.loading(messages.loading, {
+      position: isRTL ? "top-left" : "top-right",
+    })
     const res = await submitForm(null, "inventory", newItem)
-    if (res.record)
+    toast.update(loadingToastId, {
+      render: res.record ? messages.success_add : messages.error_add,
+      type: res.record ? "success" : "error",
+      isLoading: false,
+      autoClose: 5000,
+      closeOnClick: true,
+    })
+
+     if (res.record)
     {
-      // TODO add new item to inventory
+      // Refresh inventory data
+      const updatedInventory = await get_inventory(filter)
+      setInventory(updatedInventory)
+      calculateStats(updatedInventory)
       console.log(res.msg)
     }
     else
       console.error(res.msg)
+
 
     setShowAddDialog(false)
     // Reset form
@@ -110,13 +150,34 @@ export default function InventoryPage() {
   const handleRemoveItemInventory = async (item: InventoryRecord) => {
     const pb = getPocketBase()
 
+    // Show loading toast
+    const loadingToastId = toast.loading(messages.loading, {
+      position: isRTL ? "top-left" : "top-right",
+    })
     try {
       await pb.collection("inventory").delete(item.id)
-      // TODO remove item from inventory
-      // setInventory(inventory.filter((_item, i) => {_item.id !== item.id}))
+
+      toast.update(loadingToastId, {
+        render: messages.success_delete,
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+        closeOnClick: true,
+      })
+      // Refresh inventory data
+      const updatedInventory = await get_inventory(filter)
+      setInventory(updatedInventory)
+      calculateStats(updatedInventory)
       console.log("success remove item")
+      // setInventory(inventory.filter((_item, i) => {_item.id !== item.id}))
     } catch {
-      console.error("faild remove item")
+      toast.update(loadingToastId, {
+        render: messages.error_delete,
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+        closeOnClick: true,
+      })
     }
   }
 
@@ -322,6 +383,65 @@ export default function InventoryPage() {
         </Dialog>
       </div>
 
+      {/* Inventory Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-600 text-sm font-medium">Total Items</p>
+                <p className="text-2xl font-bold text-blue-800">{inventoryStats.totalItems}</p>
+              </div>
+              <div className="p-3 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl">
+                <Hash className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-600 text-sm font-medium">Total Value</p>
+                <p className="text-2xl font-bold text-green-800">${inventoryStats.totalValue.toFixed(2)}</p>
+              </div>
+              <div className="p-3 bg-gradient-to-br from-green-400 to-green-500 rounded-xl">
+                <DollarSign className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-amber-600 text-sm font-medium">Total Weight</p>
+                <p className="text-2xl font-bold text-amber-800">{inventoryStats.totalWeight.toFixed(2)}g</p>
+              </div>
+              <div className="p-3 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl">
+                <Weight className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-red-200 bg-gradient-to-br from-red-50 to-red-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-red-600 text-sm font-medium">Low Stock Items</p>
+                <p className="text-2xl font-bold text-red-800">{inventoryStats.lowStockCount}</p>
+              </div>
+              <div className="p-3 bg-gradient-to-br from-red-400 to-red-500 rounded-xl">
+                <AlertTriangle className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Search */}
       <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
         <CardContent className="pt-6">
@@ -341,7 +461,7 @@ export default function InventoryPage() {
       <Card className="border-amber-200 bg-gradient-to-br from-white to-amber-50 shadow-lg">
         <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
           <CardTitle className="text-xl font-semibold">
-            Inventory Items ({filteredInventory.length})
+            Inventory Items ({inventory.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -361,7 +481,7 @@ export default function InventoryPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredInventory.map((item) => (
+              {inventory.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="font-mono text-sm">{item.item_id}</TableCell>
                   <TableCell className="font-medium">{item.item_name}</TableCell>

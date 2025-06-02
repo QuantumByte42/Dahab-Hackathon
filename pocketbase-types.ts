@@ -4,7 +4,6 @@
 
 import type PocketBase from 'pocketbase'
 import type { RecordService } from 'pocketbase'
-import { InvoiceItem } from './definitions'
 
 export enum Collections {
 	Authorigins = "_authOrigins",
@@ -99,7 +98,7 @@ export enum AdminsRoleOptions {
 	"sales" = "sales",
 	"admin" = "admin",
 }
-export type AdminsRecord = {
+export type AdminsRecord<Tportable_dahab_system_pricing_preferences = unknown, Tportable_dahab_system_style_preferences = unknown> = {
 	avatar?: string
 	created?: IsoDateString
 	email: string
@@ -110,6 +109,8 @@ export type AdminsRecord = {
 	name?: string
 	password: string
 	phone?: string
+	portable_dahab_system_pricing_preferences?: null | Tportable_dahab_system_pricing_preferences
+	portable_dahab_system_style_preferences?: null | Tportable_dahab_system_style_preferences
 	role?: AdminsRoleOptions
 	tokenKey: string
 	updated?: IsoDateString
@@ -158,7 +159,7 @@ export enum InvoicesTypeOptions {
 	"cash" = "cash",
 	"credit" = "credit",
 }
-export type InvoicesRecord<Titems = InvoiceItem[]> = {
+export type InvoicesRecord<Titems = unknown> = {
 	No?: string
 	created?: IsoDateString
 	customer_name?: string
@@ -190,7 +191,7 @@ export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRec
 export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
-export type AdminsResponse<Texpand = unknown> = Required<AdminsRecord> & AuthSystemFields<Texpand>
+export type AdminsResponse<Tportable_dahab_system_pricing_preferences = unknown, Tportable_dahab_system_style_preferences = unknown, Texpand = unknown> = Required<AdminsRecord<Tportable_dahab_system_pricing_preferences, Tportable_dahab_system_style_preferences>> & AuthSystemFields<Texpand>
 export type InventoryResponse<Texpand = unknown> = Required<InventoryRecord> & BaseSystemFields<Texpand>
 export type InvoicesResponse<Titems = unknown, Texpand = unknown> = Required<InvoicesRecord<Titems>> & BaseSystemFields<Texpand>
 export type ReportsResponse<Texpand = unknown> = Required<ReportsRecord> & BaseSystemFields<Texpand>

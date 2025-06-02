@@ -1,12 +1,13 @@
 import { getPocketBase } from "./pocketbase";
-import { InventoryRecord, InvoicesRecord, InvoicesResponse, InvoicesTypeOptions } from "./pocketbase-types";
+import { AdminsRecord, InventoryRecord, InvoicesRecord, InvoicesResponse, InvoicesTypeOptions } from "./pocketbase-types";
 
-export async function get_inventory() {
+export async function get_inventory(filter: string) {
     const pb = getPocketBase()
 
     const records = await pb.collection("inventory")
                             .getList<InventoryRecord>(1, 50, {
-                                expand: "vendor"
+                                filter: filter,
+                                sort: "-created"
                             });
     if (records.totalItems > 0)
         return (records.items)
@@ -113,13 +114,14 @@ export async function update_inventory_quantity(itemId: string, quantitySold: nu
     }
 }
 
-export async function get_invoices() {
+export async function get_invoices(filter?: string) {
     const pb = getPocketBase()
 
     try {
         const records = await pb.collection("invoices")
                                 .getList<InvoicesRecord>(1, 50, {
                                     expand: "customer",
+                                    filter: filter,
                                     sort: "-created"
                                 });
         if (records.totalItems > 0)
@@ -170,27 +172,29 @@ export async function validate_inventory_availability(items: Array<{item_id: str
     }
 }
 
-// Transform invoice data to transaction format
-interface TransactionData {
-    id: string
-    sale_id: string
-    customer_name: string
-    customer_phone?: string
-    gold_type: string
-    karat: number
-    weight_grams: number
-    price_per_gram_jod: number
-    total_amount_jod: number
-    payment_method: string
-    created: string
-}
+// // Transform invoice data to transaction format
+// interface TransactionData {
+//     id: string
+//     sale_id: string
+//     customer_name: string
+//     customer_phone?: string
+//     gold_type: string
+//     karat: number
+//     weight_grams: number
+//     price_per_gram_jod: number
+//     total_amount_jod: number
+//     payment_method: string
+//     created: string
+// }
 
-export async function get_admins() {
+export async function get_admins(filter: string) {
     const pb = getPocketBase()
 
     try {
         const records = await pb.collection("admins")
-                                .getList(1, 50);
+                                .getList<AdminsRecord>(1, 50, {
+                                    filter: filter
+                                });
         if (records.totalItems > 0)
             return (records.items)
         return ([])
@@ -209,5 +213,69 @@ export async function create_admin(adminData: Record<string, unknown>) {
     } catch (error) {
         console.error("Error creating admin:", error)
         return null
+    }
+}
+
+export async function getDashboardStatistics() {
+    const pb = getPocketBase()
+    
+    try {
+        // Get today's date range
+        const today = new Date()
+        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+        const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+        
+        const startISO = startOfDay.toISOString()
+        const endISO = endOfDay.toISOString()
+
+        // Parallel fetch for better performance
+        const [
+            todayInvoices,
+            recentInvoices,
+            inventory,
+            activeAdmins
+        ] = await Promise.all([
+            pb.collection('invoices').getList(1, 50, {
+                filter: `created >= "${startISO}" && created < "${endISO}"`,
+                sort: '-created'
+            }),
+            pb.collection('invoices').getList(1, 10, {
+                sort: '-created'
+            }),
+            pb.collection('inventory').getList(1, 200, {
+                fields: 'id,item_name,item_type,weight,quantity,karat,cost_price,selling_price'
+            }),
+            pb.collection('admins').getList(1, 50, {
+                filter: 'is_active = true',
+                fields: 'id,name,role'
+            })
+        ])
+
+        return {
+            todayInvoices: todayInvoices.items,
+            recentInvoices: recentInvoices.items,
+            inventory: inventory.items,
+            activeAdmins: activeAdmins.items
+        }
+    } catch (error) {
+        console.error("Error fetching dashboard statistics:", error)
+        return null
+    }
+}
+
+export async function getInventoryAlerts() {
+    const pb = getPocketBase()
+    
+    try {
+        const lowStockItems = await pb.collection('inventory').getList(1, 50, {
+            filter: 'quantity <= 5',
+            sort: 'quantity',
+            fields: 'id,item_name,item_type,quantity,karat'
+        })
+        
+        return lowStockItems.items
+    } catch (error) {
+        console.error("Error fetching inventory alerts:", error)
+        return []
     }
 }
