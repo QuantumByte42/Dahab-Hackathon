@@ -13,7 +13,6 @@ export default async function middleware(req: NextRequest) {
         pb.authStore.loadFromCookie(token)
 
         const user = await pb.collection("admins").authRefresh()
-        console.log(`user: ${user.record.id}`)
         if (user.record)
         {
           await submitForm(user.record.id, "admins", {

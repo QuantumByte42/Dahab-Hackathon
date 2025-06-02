@@ -20,7 +20,7 @@ export function initPocketBase() {
       pb = new PocketBase(finalUrl).autoCancellation(false)
       
       // Log connection for debugging
-      console.log("PocketBase initialized with URL:", finalUrl)
+      // console.log("PocketBase initialized with URL:", finalUrl)
     }
     catch {}
   }

@@ -46,7 +46,7 @@ export default function UserManagementPage() {
       }
     }
     fetch()
-  }, [])
+  }, [searchTerm])
 
   const toggleEmployeeStatus = async (employeeId: string, current_status: boolean) => {
     // Here you would update employee status in PocketBase
