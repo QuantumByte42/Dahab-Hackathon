@@ -64,6 +64,17 @@ export default function InventoryPage() {
     }
     setInventoryStats(stats)
   }
+  
+  useEffect(() => {
+    // Initial load of inventory data
+    const initialFetch = async () => {
+      const inventory = await get_inventory("")
+      setInventory(inventory);
+      calculateStats(inventory);
+    }
+    initialFetch()
+  }, [])
+  
   useEffect(() => {
     const fetch = async () => {
       let filter = ""
@@ -72,6 +83,7 @@ export default function InventoryPage() {
       setFilter(filter)
       const inventory = await get_inventory(filter)
       setInventory(inventory);
+      calculateStats(inventory);
     }
     fetch()
   }, [searchTerm])
@@ -404,7 +416,7 @@ export default function InventoryPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-green-600 text-sm font-medium">Total Value</p>
-                <p className="text-2xl font-bold text-green-800">${inventoryStats.totalValue.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-green-800">{inventoryStats.totalValue.toFixed(2)} {isRTL ? "د.أ" : "JOD"}</p>
               </div>
               <div className="p-3 bg-gradient-to-br from-green-400 to-green-500 rounded-xl">
                 <DollarSign className="h-6 w-6 text-white" />
