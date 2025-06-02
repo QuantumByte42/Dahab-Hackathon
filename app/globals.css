@@ -143,3 +143,35 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Update the RTL styles */
+[dir="rtl"] {
+  --sidebar-position: right;
+  --trigger-margin: -1rem 0 0 0;
+  --separator-margin: 0 0 0 0.5rem;
+}
+
+[dir="ltr"] {
+  --sidebar-position: left;
+  --trigger-margin: 0 0 0 -1rem;
+  --separator-margin: 0 0.5rem 0 0;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  [dir="rtl"] & {
+    right: 0;
+  }
+  [dir="ltr"] & {
+    left: 0;
+  }
+}
+
+.sidebar-trigger {
+  margin: var(--trigger-margin);
+}
+
+.sidebar-separator {
+  margin: var(--separator-margin);
+}

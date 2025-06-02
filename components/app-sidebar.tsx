@@ -58,12 +58,16 @@ const navigationItems = [
 ]
 
 export function AppSidebar() {
-  const { t } = useLanguage()
+  const { t, isRTL } = useLanguage()
   const [currentPage, setCurrentPage] = useState("dashboard")
   const router = useRouter()
 
   return (
-    <Sidebar className="border-r border-amber-100">
+    <Sidebar 
+      className="border-r border-amber-100" 
+      side={isRTL ? "right" : "left"}
+      variant="inset"
+    >
       <SidebarHeader className="border-b border-amber-100 p-4 bg-gradient-to-r from-amber-50 to-yellow-50">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-lg shadow-sm">

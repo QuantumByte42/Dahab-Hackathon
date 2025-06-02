@@ -67,6 +67,33 @@ const translations = {
     language: "Language",
     english: "English",
     arabic: "Arabic",
+
+    goldStorePOS: "Gold Store POS",
+    adminDashboard: "Admin Dashboard",
+    adminUser: "Admin User",
+    systemAdministrator: "System Administrator",
+    navigation: "Navigation",
+
+    //login
+    welcomeBack: "Welcome Back",
+    signInToContinue: "Sign in to your account to continue",
+    emailAddress: "Email Address",
+    enterEmail: "Enter your email",
+    password: "Password",
+    enterPassword: "Enter your password",
+    signIn: "Sign In to Dashboard",
+    signingIn: "Signing in...",
+    secureAccess: "Secure access to your gold store management system",
+    logout: "Logout",
+    manageYour: "Manage Your",
+    goldBusiness: "Gold Business",
+    withPrecision: "with Precision",
+    completeSolution: "Complete solution for jewelry stores with inventory management, sales tracking, and customer management.",
+    inventoryManagement: "Inventory & Stock Management",
+    salesAnalytics: "Sales Analytics & Reports",
+    secureTransactions: "Secure Transaction Processing",
+    premiumPos: "Premium Point of Sale",
+    
   },
   ar: {
     // Navigation
@@ -122,13 +149,40 @@ const translations = {
     language: "اللغة",
     english: "الإنجليزية",
     arabic: "العربية",
+
+    //header
+    goldStorePOS: "نقطة بيع الذهب",
+    adminDashboard: "لوحة تحكم الإدارة",
+    adminUser: "مدير النظام",
+    systemAdministrator: "مسؤول النظام",
+    navigation: "التنقل",
+
+    //login
+    welcomeBack: "مرحباً بعودتك",
+    signInToContinue: "سجل دخول للمتابعة",
+    emailAddress: "البريد الإلكتروني",
+    enterEmail: "أدخل بريدك الإلكتروني",
+    password: "كلمة المرور",
+    enterPassword: "أدخل كلمة المرور",
+    signIn: "تسجيل الدخول للوحة التحكم",
+    signingIn: "جاري تسجيل الدخول...",
+    secureAccess: "دخول آمن لنظام إدارة متجر الذهب",
+    logout: "تسجيل خروج",
+    manageYour: "أدر",
+    goldBusiness: "تجارة الذهب",
+    withPrecision: "بدقة عالية",
+    completeSolution: "حل متكامل لمتاجر المجوهرات مع إدارة المخزون وتتبع المبيعات وإدارة العملاء.",
+    inventoryManagement: "إدارة المخزون والبضائع",
+    salesAnalytics: "تحليلات وتقارير المبيعات",
+    secureTransactions: "معاملات آمنة ومضمونة",
+    premiumPos: "نظام نقاط البيع المتميز",
   },
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>("en")
+  const [language, setLanguage] = useState<Language>("ar") //Arabic is now default
 
   const t = (key: string): string => {
     return translations[language][key as keyof (typeof translations)["en"]] || key
