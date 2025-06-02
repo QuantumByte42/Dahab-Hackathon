@@ -18,9 +18,9 @@ import { submitForm } from "@/lib/submit"
 import { toast } from "react-toastify"
 
 const messages = {
-  loading: "",
-  success: "",
-  error: "",
+  loading: "add new employee, wait...",
+  success: "Success create new employee",
+  error: "Failed create new employeee",
 }
 
 export default function UserManagementPage() {
