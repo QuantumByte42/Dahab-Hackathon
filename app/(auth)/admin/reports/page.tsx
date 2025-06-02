@@ -20,6 +20,7 @@ export default function ReportsPage() {
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
   const [reports, setReports] = useState<ReportsRecord[]>([])
+  const [currentFile, setCurrentFile] = useState<Blob | null>(null)
   // const [employeeFilter, setEmployeeFilter] = useState("")
 
 
@@ -29,7 +30,9 @@ export default function ReportsPage() {
       try {
         const pb = getPocketBase()
         const reconrds = await pb.collection("reports")
-                        .getList<ReportsRecord>(1, 50)
+                        .getList<ReportsRecord>(1, 50, {
+                          sort: "-created"
+                        })
         if (reconrds.totalItems > 0)
           setReports(reconrds.items)
       } catch {
@@ -102,6 +105,7 @@ export default function ReportsPage() {
     
   }
 
+
   const reportTypes = [
     { value: "sales", label: "Sales Report", icon: TrendingUp },
     { value: "inventory", label: "Inventory Report", icon: Package },
@@ -154,14 +158,7 @@ export default function ReportsPage() {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
       
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${reportTitle}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      setCurrentFile(blob)
 
     const reportData = {
       title: reportTitle,
@@ -172,15 +169,25 @@ export default function ReportsPage() {
       size: blob.size
     }
 
-    await submitForm(null, "reports", reportData)
+    const res = await submitForm(null, "reports", reportData)
 
-    // console.log("Generating report:", reportData)
-    // Here you would generate the actual report and export to Excel
+    if (res.record)
+      console.log(res.msg)
+    else
+      console.error(res.msg)
   }
 
   const exportToExcel = () => {
-    // Here you would implement Excel export functionality
-    console.log("Exporting to Excel...")
+    if (!currentFile) return;
+
+    const url = window.URL.createObjectURL(currentFile);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${reportTitle}.xlsx`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   }
 
   return (
@@ -278,7 +285,7 @@ export default function ReportsPage() {
             <Button 
               onClick={generateReport} 
               className="gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200" 
-              disabled={!reportType || !dateFrom || !dateTo}
+              disabled={!reportTitle || !reportType || !dateFrom || !dateTo}
             >
               <FileText className="h-4 w-4" />
               Generate Report
@@ -287,7 +294,7 @@ export default function ReportsPage() {
               onClick={exportToExcel} 
               variant="outline" 
               className="gap-2 border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400" 
-              disabled={!reportType}
+              disabled={!reportTitle || !reportType || !dateFrom || !dateTo}
             >
               <Download className="h-4 w-4" />
               Export to Excel
