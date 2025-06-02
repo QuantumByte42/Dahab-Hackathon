@@ -29,12 +29,20 @@ export default function ReportsPage() {
     const fetch = async () => {
       try {
         const pb = getPocketBase()
-        const reconrds = await pb.collection("reports")
+        const records = await pb.collection("reports")
                         .getList<ReportsRecord>(1, 50, {
                           sort: "-created"
                         })
-        if (reconrds.totalItems > 0)
-          setReports(reconrds.items)
+      if (records.totalItems > 0)
+      {
+          const reports = records.items.map(report => 
+            ({...report, 
+              file: report.file 
+                ? pb.files.getURL(report, report.file) 
+                : undefined
+            }))
+          setReports(reports)
+        }
       } catch {
         setReports([])
       }
@@ -188,6 +196,17 @@ export default function ReportsPage() {
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
+  }
+
+  const downloadFile = (url?: string, name?:string) => {
+    if (url === undefined || name === undefined) return
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${name}.xlsx`; // Optional: force download name
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   return (
@@ -366,16 +385,18 @@ export default function ReportsPage() {
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <div className="text-sm text-amber-600">
-                      {new Date(report.date_from || "").toLocaleDateString(isRTL ? "ar-JO" : "en-US")}
+                      from: {new Date(report.date_from || "").toLocaleDateString(isRTL ? "ar-JO" : "en-US")}
                   </div>
                   <div className="text-sm text-amber-600">
-                    {new Date(report.date_to || "").toLocaleDateString(isRTL ? "ar-JO" : "en-US")}
+                      to: {new Date(report.date_to || "").toLocaleDateString(isRTL ? "ar-JO" : "en-US")}
                   </div>
                 </div>
                 <Button 
                 size="sm" 
                 variant="outline"
                 className="border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 mt-1"
+                disabled={!report.file || !report.title}
+                onClick={() => {downloadFile(report.file, report.title)}}
                 >
                 <Download className="h-4 w-4" />
                 </Button>
