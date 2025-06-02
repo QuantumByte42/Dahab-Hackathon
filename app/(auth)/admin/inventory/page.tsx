@@ -39,18 +39,18 @@ export default function InventoryPage() {
   })
   const [newItem, setNewItem] = useState({
     id: "",
-    item_id: "QB4_00005",
-    item_name: "test",
-    item_type: "Ring",
-    weight: "5.1",
-    karat: "21",
-    cost_price: "150",
-    selling_price: "180",
-    quantity: "5",
-    vendor_name: "test",
-    vendor_phone: "test",
-    vendor_address: "test",
-    vendor_contact_person: "test",
+    item_id: "",
+    item_name: "",
+    item_type: "",
+    weight: "",
+    karat: "",
+    cost_price: "",
+    selling_price: "",
+    quantity: "",
+    vendor_name: "",
+    vendor_phone: "",
+    vendor_address: "",
+    vendor_contact_person: "",
   })
 
 
