@@ -6,19 +6,23 @@ let pb: PocketBase
 // Initialize PocketBase
 export function initPocketBase() {
   if (!pb) {
-    // Get URL from environment variables, prioritizing NEXT_POCKETBASE for server-side
-    const url = 
-      process.env.NEXT_POCKETBASE || 
-      process.env.NEXT_PUBLIC_POCKETBASE_URL || 
-      "https://api.dahab.qb4.tech"
+    try {
 
-    // Ensure the URL has a protocol
-    const finalUrl = url.startsWith("http") ? url : `https://${url}`
-
-    pb = new PocketBase(finalUrl).autoCancellation(false)
-    
-    // Log connection for debugging
-    console.log("PocketBase initialized with URL:", finalUrl)
+      // Get URL from environment variables, prioritizing NEXT_POCKETBASE for server-side
+      const url = 
+        process.env.NEXT_POCKETBASE || 
+        process.env.NEXT_PUBLIC_POCKETBASE_URL || 
+        "https://api.dahab.qb4.tech"
+      
+      // Ensure the URL has a protocol
+      const finalUrl = url.startsWith("http") ? url : `https://${url}`
+      
+      pb = new PocketBase(finalUrl).autoCancellation(false)
+      
+      // Log connection for debugging
+      console.log("PocketBase initialized with URL:", finalUrl)
+    }
+    catch {}
   }
   return pb
 }
