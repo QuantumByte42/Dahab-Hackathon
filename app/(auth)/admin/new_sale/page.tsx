@@ -13,6 +13,16 @@ import { ShoppingCart, Plus, Trash2, Calculator, ArrowLeft } from "lucide-react"
 import { InventoryItemTypeOptions, InventoryKaratOptions, InvoicesRecord } from "@/lib/pocketbase-types"
 import { get_item, create_invoice, update_inventory_quantity, validate_inventory_availability } from "@/lib/api"
 import InvoicePrint from "@/components/invoice-print"
+import { toast } from "react-toastify"
+
+const messages = {
+  loading: "",
+  success: "",
+  error: "",
+  outOfStock: "",
+  FailedCreateInvoice: "",
+  failedUpdateInventory: ""
+}
 
 export default function SalesPage() {
   const { isRTL } = useLanguage()
@@ -67,7 +77,6 @@ export default function SalesPage() {
       setOutOfStock((item.quantity ?? 0) <= 0)
     }
     fetch()
-    console.log(`currentItemId: ${currentItem.item_id}`)
   }, [currentItem.item_id])
 
   // Auto-calculate making charges (typically 10-15% of selling price)
@@ -126,6 +135,10 @@ export default function SalesPage() {
   const handleCompleteSale = async () => {
     if (saleItems.length === 0) return
     setLoading(true)
+    // Show loading toast
+    const loadingToastId = toast.loading(messages.loading, {
+      position: isRTL ? "top-left" : "top-right",
+    })
     try {
       // 1. Validate inventory availability
       const inventoryValidation = await validate_inventory_availability(
@@ -134,7 +147,13 @@ export default function SalesPage() {
       
       const invalidItems = inventoryValidation.filter(v => !v.valid)
       if (invalidItems.length > 0) {
-        alert(`Inventory validation failed:\n${invalidItems.map(item => item.message).join('\n')}`)
+        toast.update(loadingToastId, {
+          render: messages.outOfStock,
+          type: "error",
+          isLoading: false,
+          autoClose: 5000,
+          closeOnClick: true,
+        })
         setLoading(false)
         return
       }
@@ -158,7 +177,13 @@ export default function SalesPage() {
       const invoice = await create_invoice(invoiceData)
       
       if (!invoice) {
-        alert("Failed to create invoice")
+        toast.update(loadingToastId, {
+          render: messages.FailedCreateInvoice,
+          type: "error",
+          isLoading: false,
+          autoClose: 5000,
+          closeOnClick: true,
+        })
         setLoading(false)
         return
       }
@@ -168,7 +193,13 @@ export default function SalesPage() {
         try {
           await update_inventory_quantity(item.item_id, item.quantity)
         } catch (error) {
-          console.error(`Failed to update inventory for ${item.item_id}:`, error)
+          toast.update(loadingToastId, {
+            render: messages.failedUpdateInventory,
+            type: "error",
+            isLoading: false,
+            autoClose: 5000,
+            closeOnClick: true,
+          })
           // Note: You might want to implement a rollback mechanism here
         }
       }
@@ -192,10 +223,23 @@ export default function SalesPage() {
         selling_price: "",
         quantity: "1",
       })
+      toast.update(loadingToastId, {
+        render: messages.success,
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+        closeOnClick: true,
+      })
       
     } catch (error) {
       console.error("Error completing sale:", error)
-      alert("Failed to complete sale. Please try again.")
+      toast.update(loadingToastId, {
+        render: messages.error,
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+        closeOnClick: true,
+      })
     }
     setLoading(false)
   }

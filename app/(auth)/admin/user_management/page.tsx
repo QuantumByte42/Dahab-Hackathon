@@ -15,6 +15,13 @@ import { AdminsRecord } from "@/lib/pocketbase-types"
 import { get_admins } from "@/lib/api"
 import { getPocketBase } from "@/lib/pocketbase"
 import { submitForm } from "@/lib/submit"
+import { toast } from "react-toastify"
+
+const messages = {
+  loading: "",
+  success: "",
+  error: "",
+}
 
 export default function UserManagementPage() {
   const { isRTL } = useLanguage()
@@ -63,9 +70,20 @@ export default function UserManagementPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     
+    // Show loading toast
     try {
+      const loadingToastId = toast.loading(messages.loading, {
+        position: isRTL ? "top-left" : "top-right",
+      })
       const data = {...newEmployee, passwordConfirm: newEmployee.password}
-      await submitForm(null, "admins", data)
+      const res = await submitForm(null, "admins", data)
+      toast.update(loadingToastId, {
+        render: res.record ? messages.success : messages.error,
+        type: res.record ? "success" : "error",
+        isLoading: false,
+        autoClose: 5000,
+        closeOnClick: true,
+      })
     } catch {
 
     }

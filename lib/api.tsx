@@ -1,12 +1,13 @@
 import { getPocketBase } from "./pocketbase";
 import { AdminsRecord, InventoryRecord, InvoicesRecord, InvoicesResponse, InvoicesTypeOptions } from "./pocketbase-types";
 
-export async function get_inventory() {
+export async function get_inventory(filter: string) {
     const pb = getPocketBase()
 
     const records = await pb.collection("inventory")
                             .getList<InventoryRecord>(1, 50, {
-                                expand: "vendor"
+                                filter: filter,
+                                sort: "-created"
                             });
     if (records.totalItems > 0)
         return (records.items)

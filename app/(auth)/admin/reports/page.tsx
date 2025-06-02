@@ -12,6 +12,14 @@ import { getPocketBase } from "@/lib/pocketbase"
 import { useLanguage } from "@/contexts/language-context"
 import * as XLSX from 'xlsx';
 import { submitForm } from "@/lib/submit"
+import { toast } from "react-toastify"
+
+const messages = {
+  loading: "",
+  success: "",
+  error: "",
+}
+
 
 export default function ReportsPage() {
   const { isRTL } = useLanguage()
@@ -128,7 +136,10 @@ export default function ReportsPage() {
       console.error("Please select report type and date range")
       return
     }
-
+    // Show loading toast
+    const loadingToastId = toast.loading(messages.loading, {
+      position: "top-right",
+    })
     const filter = `created >= '${dateFrom}' && created <= '${dateTo}'`
 
     let data = null
@@ -145,28 +156,33 @@ export default function ReportsPage() {
         break
       default:
         console.error("Invalid report type selected")
-        return
+        toast.dismiss(loadingToastId)
+        return 
     }
 
-    if (!data) return
-
-     const worksheet = XLSX.utils.json_to_sheet(data);
-      const workbook = XLSX.utils.book_new();
-
-      XLSX.utils.book_append_sheet(workbook, worksheet, reportTitle);
-
-      // Generate Excel buffer
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: 'xlsx',
-        type: 'array',
-      });
-
-      // Create a blob and trigger download manually
-      const blob = new Blob([excelBuffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      });
+    if (!data)
+    {
+      toast.dismiss(loadingToastId)
+      return
+    }
       
-      setCurrentFile(blob)
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, reportTitle);
+
+    // Generate Excel buffer
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+
+    // Create a blob and trigger download manually
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    
+    setCurrentFile(blob)
 
     const reportData = {
       title: reportTitle,
@@ -179,10 +195,13 @@ export default function ReportsPage() {
 
     const res = await submitForm(null, "reports", reportData)
 
-    if (res.record)
-      console.log(res.msg)
-    else
-      console.error(res.msg)
+    toast.update(loadingToastId, {
+      render: res.record ? messages.success : messages.error,
+      type: res.record ? "success" : "error",
+      isLoading: false,
+      autoClose: 5000,
+      closeOnClick: true,
+    })
   }
 
   const exportToExcel = () => {

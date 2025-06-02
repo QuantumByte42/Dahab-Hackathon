@@ -15,6 +15,15 @@ import { submitForm } from "@/lib/submit"
 import { get_inventory } from "@/lib/api"
 import { InventoryItemTypeOptions, InventoryKaratOptions, InventoryRecord } from "@/lib/pocketbase-types"
 import { getPocketBase } from "@/lib/pocketbase"
+import { toast } from "react-toastify"
+
+const messages = {
+  loading: "",
+  success_add: "",
+  error_add: "",
+  success_delete: "",
+  error_delete: "",
+}
 
 export default function InventoryPage() {
   const { isRTL } = useLanguage()
@@ -37,20 +46,16 @@ export default function InventoryPage() {
     vendor_contact_person: "test",
   })
 
-  const filteredInventory = inventory.filter(
-    (item) =>
-      item.item_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.item_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.item_id.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
-
   useEffect(() => {
     const fetch = async () => {
-      const inventory = await get_inventory()
+      let filter = ""
+      if (searchTerm !== undefined)
+          filter = `item_name ~ '${searchTerm}' || item_type ~ '${searchTerm}' || item_id ~ '${searchTerm}'`
+      const inventory = await get_inventory(filter)
       setInventory(inventory);
     }
     fetch()
-  }, [])
+  }, [searchTerm])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -59,14 +64,21 @@ export default function InventoryPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+     // Show loading toast
+    const loadingToastId = toast.loading(messages.loading, {
+      position: isRTL ? "top-left" : "top-right",
+    })
     const res = await submitForm(null, "inventory", newItem)
-    if (res.record)
-    {
-      // TODO add new item to inventory
-      console.log(res.msg)
-    }
-    else
-      console.error(res.msg)
+    toast.update(loadingToastId, {
+      render: res.record ? messages.success_add : messages.error_add,
+      type: res.record ? "success" : "error",
+      isLoading: false,
+      autoClose: 5000,
+      closeOnClick: true,
+    })
+
+    // TODO add new item to inventory
+
 
     setShowAddDialog(false)
     // Reset form
@@ -110,13 +122,30 @@ export default function InventoryPage() {
   const handleRemoveItemInventory = async (item: InventoryRecord) => {
     const pb = getPocketBase()
 
+    // Show loading toast
+    const loadingToastId = toast.loading(messages.loading, {
+      position: isRTL ? "top-left" : "top-right",
+    })
     try {
       await pb.collection("inventory").delete(item.id)
+
+      toast.update(loadingToastId, {
+        render: messages.success_delete,
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+        closeOnClick: true,
+      })
       // TODO remove item from inventory
       // setInventory(inventory.filter((_item, i) => {_item.id !== item.id}))
-      console.log("success remove item")
     } catch {
-      console.error("faild remove item")
+      toast.update(loadingToastId, {
+        render: messages.error_delete,
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+        closeOnClick: true,
+      })
     }
   }
 
@@ -341,7 +370,7 @@ export default function InventoryPage() {
       <Card className="border-amber-200 bg-gradient-to-br from-white to-amber-50 shadow-lg">
         <CardHeader className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-t-lg">
           <CardTitle className="text-xl font-semibold">
-            Inventory Items ({filteredInventory.length})
+            Inventory Items ({inventory.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -361,7 +390,7 @@ export default function InventoryPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredInventory.map((item) => (
+              {inventory.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="font-mono text-sm">{item.item_id}</TableCell>
                   <TableCell className="font-medium">{item.item_name}</TableCell>

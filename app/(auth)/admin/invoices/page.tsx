@@ -13,6 +13,7 @@ import { History, Search, Filter, Download, Calendar } from "lucide-react"
 import { InvoicesRecord } from '@/lib/pocketbase-types'
 import { get_invoices } from '@/lib/api'
 import * as XLSX from 'xlsx';
+import { toast } from "react-toastify"
 
 export default function InvoicesPage() {
   const { t, isRTL } = useLanguage()
@@ -41,7 +42,12 @@ export default function InvoicesPage() {
         setInvoices(data)
         // setFilter(filter)
       } catch (error) {
-        console.error('Error fetching invoices:', error)
+        // Show error toast
+        toast.error("error fetch invoices", {
+          position: isRTL ? "top-left" : "top-right",
+          autoClose: 5000,
+          closeOnClick: true,
+        })
       } finally {
         // setLoading(false)
       }
