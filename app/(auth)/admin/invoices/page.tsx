@@ -12,6 +12,7 @@ import { useLanguage } from "@/contexts/language-context"
 import { History, Search, Filter, Download, Calendar } from "lucide-react"
 import { InvoicesRecord } from '@/lib/pocketbase-types'
 import { get_invoices } from '@/lib/api'
+import * as XLSX from 'xlsx';
 
 export default function InvoicesPage() {
   const { t, isRTL } = useLanguage()
@@ -55,7 +56,41 @@ export default function InvoicesPage() {
   const exportTransactions = () => {
 
     // TODO: Here you would implement CSV/PDF export
-    console.log("Exporting transactions:", invoices)
+    const data = invoices.map((invoice) => ({
+      No: invoice.No,
+      customer_name: invoice.customer_name,
+      customer_phone: invoice.customer_phone,
+      subtotal: invoice.subtotal,
+      making_charges: invoice.making_charges,
+      total_amount: invoice.total_amount,
+      payment_method: invoice.type,
+      date: invoice.created
+    }))
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "invoices");
+
+    // Generate Excel buffer
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+
+    // Create a blob and trigger download manually
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `invoices.xlsx`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   }
 
   const getPaymentMethodBadge = (method: string) => {
