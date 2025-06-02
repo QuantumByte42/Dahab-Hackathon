@@ -1,6 +1,15 @@
 "use client"
 
-import { BarChart3, Package, Plus, Settings, ShoppingCart, Users, History, FileText } from "lucide-react"
+import {
+  BarChart3,
+  Package,
+  Plus,
+  Settings,
+  ShoppingCart,
+  Users,
+  History,
+  FileText,
+} from "lucide-react"
 
 import {
   Sidebar,
@@ -15,98 +24,86 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar"
 
-import { useRouter } from 'next/navigation'
-import { useLanguage } from "@/contexts/language-context"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 const navigationItems = [
-  {
-    title: "dashboard",
-    url: "/admin/",
-    icon: BarChart3,
-  },
-  {
-    title: "newSale",
-    url: "/admin/new_sale",
-    icon: Plus,
-  },
-  {
-    title: "inventory",
-    url: "/admin/inventory",
-    icon: Package,
-  },
-  {
-    title: "Invoices",
-    url: "/admin/invoices",
-    icon: History,
-  },
-  {
-    title: "User Management",
-    url: "/admin/user_management",
-    icon: Users,
-  },
-  {
-    title: "Reports",
-    url: "/admin/reports",
-    icon: FileText,
-  },
-  {
-    title: "settings",
-    url: "/admin/settings",
-    icon: Settings,
-  },
+  { title: "لوحة التحكم", url: "/admin/", icon: BarChart3 },
+  { title: "عملية بيع جديدة", url: "/admin/new_sale", icon: Plus },
+  { title: "المخزون", url: "/admin/inventory", icon: Package },
+  { title: "الفواتير", url: "/admin/invoices", icon: History },
+  { title: "إدارة المستخدمين", url: "/admin/user_management", icon: Users },
+  { title: "التقارير", url: "/admin/reports", icon: FileText },
+  { title: "الإعدادات", url: "/admin/settings", icon: Settings },
 ]
 
 export function AppSidebar() {
-  const { t } = useLanguage()
   const [currentPage, setCurrentPage] = useState("dashboard")
   const router = useRouter()
 
   return (
-    <Sidebar className="border-r border-amber-100">
-      <SidebarHeader className="border-b border-amber-100 p-4 bg-gradient-to-r from-amber-50 to-yellow-50">
+    <Sidebar className="border-l border-grey-100 shadow-sm min-w-[250px] bg-white" side="right">
+      {/* Header */}
+      <SidebarHeader className="border-b border-grey-100 p-4 bg-gradient-to-r from-grey-50 to-white-50 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-lg shadow-sm">
+          <div className="p-2 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-xl shadow-md">
             <ShoppingCart className="h-5 w-5 text-white" />
           </div>
           <div>
-            <span className="font-bold text-lg text-gray-900">Gold POS</span>
-            <p className="text-xs text-amber-600 font-medium">Management System</p>
+            <h1 className="font-extrabold text-base text-gray-900">نظام المبيعات</h1>
+            <p className="text-xs text-grey-600">لإدارة متاجر الذهب</p>
           </div>
         </div>
       </SidebarHeader>
-      <SidebarContent className="bg-white">
+
+      {/* Content */}
+      <SidebarContent className="bg-white px-2 py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-amber-700 font-semibold">{t("navigation")}</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-grey-700 font-semibold px-2 mb-2">
+            القائمة الرئيسية
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild={false}
-                    isActive={currentPage === item.url.slice(1) || (item.url === "/" && currentPage === "dashboard")}
-                    onClick={() => {
-                      const page = item.url === "/" ? "dashboard" : item.url.slice(1)
-                      setCurrentPage(page)
-                      if (currentPage !== page)
-                        router.push(item.url)
-                    }}
-                    className="group data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-100 data-[state=active]:to-yellow-100 data-[state=active]:text-amber-800 data-[state=active]:border-l-4 data-[state=active]:border-amber-500 hover:bg-amber-50 transition-all duration-200"
-                  >
-                    <div className="flex items-center gap-3 cursor-pointer">
-                      <item.icon className="h-4 w-4 group-data-[state=active]:text-amber-600" />
-                      <span className="font-medium">{t(item.title)}</span>
-                    </div>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+            <SidebarMenu className="space-y-1">
+              {navigationItems.map((item) => {
+                const isActive =
+                  currentPage === item.url.slice(1) ||
+                  (item.url === "/admin/" && currentPage === "dashboard")
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild={false}
+                      isActive={isActive}
+                      onClick={() => {
+                        const page = item.url === "/admin/" ? "dashboard" : item.url.slice(1)
+                        setCurrentPage(page)
+                        if (currentPage !== page) router.push(item.url)
+                      }}
+                      className={`group transition-all duration-150 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-grey-50
+                        ${isActive
+                          ? "bg-gradient-to-r from-grey-100 to-white-100 text-grey-900 border-r-4 border-grey-500"
+                          : ""
+                        }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <item.icon
+                          className={`h-5 w-5 ${isActive ? "text-grey-600" : "text-gray-400"
+                            } group-hover:text-grey-600 transition-colors`}
+                        />
+                        <span>{item.title}</span>
+                      </div>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-4 border-t border-amber-100 bg-gradient-to-r from-amber-50 to-yellow-50">
-        <div className="text-sm text-amber-600 font-medium">Gold Store POS v1.0</div>
-        <div className="text-xs text-gray-500">Premium Point of Sale</div>
+
+      {/* Footer */}
+      <SidebarFooter className="p-4 border-t border-grey-100 bg-gradient-to-r from-grey-50 to-white-50 shadow-inner text-right">
+        <div className="text-sm text-grey-700 font-semibold">نظام إدارة الذهب v1.0</div>
+        <div className="text-xs text-gray-500">نقطة بيع احترافية</div>
       </SidebarFooter>
     </Sidebar>
   )
