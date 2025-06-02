@@ -30,6 +30,7 @@ export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [inventory, setInventory] = useState<InventoryRecord[]>([])
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [filter, setFilter] = useState("")
   const [inventoryStats, setInventoryStats] = useState({
     totalItems: 0,
     totalValue: 0,
@@ -52,21 +53,6 @@ export default function InventoryPage() {
     vendor_contact_person: "test",
   })
 
-<<<<<<< HEAD
-  useEffect(() => {
-    const fetch = async () => {
-      let filter = ""
-      if (searchTerm !== undefined)
-          filter = `item_name ~ '${searchTerm}' || item_type ~ '${searchTerm}' || item_id ~ '${searchTerm}'`
-      const inventory = await get_inventory(filter)
-      setInventory(inventory);
-=======
-  const filteredInventory = inventory.filter(
-    (item) =>
-      item.item_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.item_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.item_id.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
 
   // Calculate inventory statistics
   const calculateStats = (inventoryData: InventoryRecord[]) => {
@@ -78,13 +64,14 @@ export default function InventoryPage() {
     }
     setInventoryStats(stats)
   }
-
   useEffect(() => {
     const fetch = async () => {
-      const inventory = await get_inventory()
-      setInventory(inventory)
-      calculateStats(inventory)
->>>>>>> refs/remotes/origin/main
+      let filter = ""
+      if (searchTerm !== undefined)
+          filter = `item_name ~ '${searchTerm}' || item_type ~ '${searchTerm}' || item_id ~ '${searchTerm}'`
+      setFilter(filter)
+      const inventory = await get_inventory(filter)
+      setInventory(inventory);
     }
     fetch()
   }, [searchTerm])
@@ -101,7 +88,6 @@ export default function InventoryPage() {
       position: isRTL ? "top-left" : "top-right",
     })
     const res = await submitForm(null, "inventory", newItem)
-<<<<<<< HEAD
     toast.update(loadingToastId, {
       render: res.record ? messages.success_add : messages.error_add,
       type: res.record ? "success" : "error",
@@ -110,20 +96,17 @@ export default function InventoryPage() {
       closeOnClick: true,
     })
 
-    // TODO add new item to inventory
-
-=======
-    if (res.record)
+     if (res.record)
     {
       // Refresh inventory data
-      const updatedInventory = await get_inventory()
+      const updatedInventory = await get_inventory(filter)
       setInventory(updatedInventory)
       calculateStats(updatedInventory)
       console.log(res.msg)
     }
     else
       console.error(res.msg)
->>>>>>> refs/remotes/origin/main
+
 
     setShowAddDialog(false)
     // Reset form
@@ -173,7 +156,6 @@ export default function InventoryPage() {
     })
     try {
       await pb.collection("inventory").delete(item.id)
-<<<<<<< HEAD
 
       toast.update(loadingToastId, {
         render: messages.success_delete,
@@ -182,15 +164,12 @@ export default function InventoryPage() {
         autoClose: 5000,
         closeOnClick: true,
       })
-      // TODO remove item from inventory
-      // setInventory(inventory.filter((_item, i) => {_item.id !== item.id}))
-=======
       // Refresh inventory data
-      const updatedInventory = await get_inventory()
+      const updatedInventory = await get_inventory(filter)
       setInventory(updatedInventory)
       calculateStats(updatedInventory)
       console.log("success remove item")
->>>>>>> refs/remotes/origin/main
+      // setInventory(inventory.filter((_item, i) => {_item.id !== item.id}))
     } catch {
       toast.update(loadingToastId, {
         render: messages.error_delete,
