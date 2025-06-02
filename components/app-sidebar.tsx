@@ -60,8 +60,8 @@ export function AppSidebar() {
   const [currentPage, setCurrentPage] = useState("dashboard")
   const router = useRouter()
 
-  // Always render with Arabic layout until loaded to match server
-  const shouldUseRTL = !isLoaded || isRTL
+  // Always render with English layout until loaded to match server
+  const shouldUseRTL = isLoaded && isRTL
 
   return (
     <Sidebar 
@@ -76,10 +76,10 @@ export function AppSidebar() {
           </div>
           <div className={shouldUseRTL ? "text-right" : "text-left"}>
             <span className="font-bold text-lg text-gray-900">
-              {isLoaded ? t("goldStorePOS") : "نقطة بيع الذهب"}
+              {isLoaded ? t("goldStorePOS") : "Gold Store POS"}
             </span>
             <p className="text-xs text-amber-600 font-medium">
-              {isLoaded ? t("adminDashboard") : "لوحة تحكم الإدارة"}
+              {isLoaded ? t("adminDashboard") : "Admin Dashboard"}
             </p>
           </div>
         </div>
@@ -87,7 +87,7 @@ export function AppSidebar() {
       <SidebarContent className="bg-white">
         <SidebarGroup>
           <SidebarGroupLabel className="text-amber-700 font-semibold">
-            {isLoaded ? t("navigation") : "التنقل"}
+            {isLoaded ? t("navigation") : "Navigation"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -106,7 +106,7 @@ export function AppSidebar() {
                     <div className={`flex items-center gap-3 cursor-pointer ${shouldUseRTL ? 'flex-row-reverse' : ''}`}>
                       <item.icon className="h-4 w-4 group-data-[state=active]:text-amber-600" />
                       <span className="font-medium">
-                        {isLoaded ? t(item.title) : "جاري التحميل..."}
+                        {isLoaded ? t(item.title) : "Loading..."}
                       </span>
                     </div>
                   </SidebarMenuButton>
@@ -118,10 +118,10 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="p-4 border-t border-amber-100 bg-gradient-to-r from-amber-50 to-yellow-50">
         <div className={`text-sm text-amber-600 font-medium ${shouldUseRTL ? 'text-right' : 'text-left'}`}>
-          {isLoaded ? t("goldStorePOS") : "نقطة بيع الذهب"} v1.0
+          {isLoaded ? t("goldStorePOS") : "Gold Store POS"} v1.0
         </div>
         <div className={`text-xs text-gray-500 ${shouldUseRTL ? 'text-right' : 'text-left'}`}>
-          {isLoaded ? t("premiumPos") : "نظام نقاط البيع المتميز"}
+          {isLoaded ? t("premiumPos") : "Premium Point of Sale"}
         </div>
       </SidebarFooter>
     </Sidebar>

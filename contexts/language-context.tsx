@@ -184,7 +184,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   // Always start with Arabic to match server rendering
-  const [language, setLanguageState] = useState<Language>('ar')
+  const [language, setLanguageState] = useState<Language>('en')
   const [isLoaded, setIsLoaded] = useState(false)
 
   // Load from localStorage only after mount (client-side only)
