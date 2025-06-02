@@ -14,6 +14,7 @@ export enum Collections {
 	Admins = "admins",
 	Inventory = "inventory",
 	Invoices = "invoices",
+	Reports = "reports",
 }
 
 // Alias types for improved usability
@@ -170,6 +171,18 @@ export type InvoicesRecord<Titems = unknown> = {
 	updated?: IsoDateString
 }
 
+export type ReportsRecord = {
+	created?: IsoDateString
+	date_from?: IsoDateString
+	date_to?: IsoDateString
+	file?: string
+	id: string
+	size?: number
+	title?: string
+	type?: string
+	updated?: IsoDateString
+}
+
 // Response types include system fields and match responses from the PocketBase API
 export type AuthoriginsResponse<Texpand = unknown> = Required<AuthoriginsRecord> & BaseSystemFields<Texpand>
 export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRecord> & BaseSystemFields<Texpand>
@@ -179,6 +192,7 @@ export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> &
 export type AdminsResponse<Texpand = unknown> = Required<AdminsRecord> & AuthSystemFields<Texpand>
 export type InventoryResponse<Texpand = unknown> = Required<InventoryRecord> & BaseSystemFields<Texpand>
 export type InvoicesResponse<Titems = unknown, Texpand = unknown> = Required<InvoicesRecord<Titems>> & BaseSystemFields<Texpand>
+export type ReportsResponse<Texpand = unknown> = Required<ReportsRecord> & BaseSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
 
@@ -191,6 +205,7 @@ export type CollectionRecords = {
 	admins: AdminsRecord
 	inventory: InventoryRecord
 	invoices: InvoicesRecord
+	reports: ReportsRecord
 }
 
 export type CollectionResponses = {
@@ -202,6 +217,7 @@ export type CollectionResponses = {
 	admins: AdminsResponse
 	inventory: InventoryResponse
 	invoices: InvoicesResponse
+	reports: ReportsResponse
 }
 
 // Type for usage with type asserted PocketBase instance
@@ -216,4 +232,5 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'admins'): RecordService<AdminsResponse>
 	collection(idOrName: 'inventory'): RecordService<InventoryResponse>
 	collection(idOrName: 'invoices'): RecordService<InvoicesResponse>
+	collection(idOrName: 'reports'): RecordService<ReportsResponse>
 }
