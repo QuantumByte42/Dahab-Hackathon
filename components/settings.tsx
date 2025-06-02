@@ -78,26 +78,13 @@ export function Settings() {
                 onChange={(e) => setTaxRate(e.target.value)}
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="language">{t("language")}</Label>
-              <Select value={language} onValueChange={(value: "en" | "ar") => setLanguage(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">{t("english")}</SelectItem>
-                  <SelectItem value="ar">{t("arabic")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </CardContent>
         </Card>
       </div>
 
       <div className="flex justify-end">
-        <Button 
-          onClick={handleSave} 
+        <Button
+          onClick={handleSave}
           className="gap-2 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
         >
           <Save className="h-4 w-4" />
