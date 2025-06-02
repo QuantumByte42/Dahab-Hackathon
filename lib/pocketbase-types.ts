@@ -4,6 +4,7 @@
 
 import type PocketBase from 'pocketbase'
 import type { RecordService } from 'pocketbase'
+import { InvoiceItem } from './definitions'
 
 export enum Collections {
 	Authorigins = "_authOrigins",
@@ -157,7 +158,7 @@ export enum InvoicesTypeOptions {
 	"cash" = "cash",
 	"credit" = "credit",
 }
-export type InvoicesRecord<Titems = unknown> = {
+export type InvoicesRecord<Titems = InvoiceItem[]> = {
 	No?: string
 	created?: IsoDateString
 	customer_name?: string
