@@ -18,11 +18,12 @@ import { getPocketBase } from "@/lib/pocketbase"
 import { toast } from "react-toastify"
 
 const messages = {
-  loading: "",
-  success_add: "",
-  error_add: "",
-  success_delete: "",
-  error_delete: "",
+  loading_add: "loading new item, wait...",
+  success_add: "success add new item",
+  error_add: "failed add item",
+  loading_delete: "Delete item, wait...",
+  success_delete: "success delete item",
+  error_delete: "failed delete item",
 }
 
 export default function InventoryPage() {
@@ -84,7 +85,7 @@ export default function InventoryPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
      // Show loading toast
-    const loadingToastId = toast.loading(messages.loading, {
+    const loadingToastId = toast.loading(messages.loading_add, {
       position: isRTL ? "top-left" : "top-right",
     })
     const res = await submitForm(null, "inventory", newItem)
@@ -151,7 +152,7 @@ export default function InventoryPage() {
     const pb = getPocketBase()
 
     // Show loading toast
-    const loadingToastId = toast.loading(messages.loading, {
+    const loadingToastId = toast.loading(messages.loading_delete, {
       position: isRTL ? "top-left" : "top-right",
     })
     try {

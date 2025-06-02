@@ -15,11 +15,10 @@ import { submitForm } from "@/lib/submit"
 import { toast } from "react-toastify"
 
 const messages = {
-  loading: "",
-  success: "",
-  error: "",
+  loading: "Create report, wait...",
+  success: "Success create report",
+  error: "Failed create report",
 }
-
 
 export default function ReportsPage() {
   const { isRTL } = useLanguage()
