@@ -47,12 +47,9 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-grey-100 p-4 bg-gradient-to-r from-grey-50 to-white-50 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-xl shadow-md">
-            <ShoppingCart className="h-5 w-5 text-white" />
+            <ShoppingCart className="h-4 w-4 text-white" />
           </div>
-          <div>
-            <h1 className="font-extrabold text-base text-gray-900">نظام المبيعات</h1>
-            <p className="text-xs text-grey-600">لإدارة متاجر الذهب</p>
-          </div>
+          <h1 className="font-extrabold text-sm text-gray-900">نظام المبيعات</h1>
         </div>
       </SidebarHeader>
 
